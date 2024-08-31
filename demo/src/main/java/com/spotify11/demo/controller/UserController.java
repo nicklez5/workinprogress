@@ -21,8 +21,10 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+    
     @Autowired
     private UserRepo userRepo;
+
     @PostMapping("/add")
     public ResponseEntity<User> addUser(@RequestBody User user) throws UserException {
         User user1 = userService.addUser(user);

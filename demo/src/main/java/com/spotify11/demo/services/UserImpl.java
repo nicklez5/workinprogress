@@ -7,12 +7,16 @@ import com.spotify11.demo.exception.CurrentUserException;
 import com.spotify11.demo.exception.UserException;
 import com.spotify11.demo.repo.SessionRepo;
 import com.spotify11.demo.repo.UserRepo;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
+
+import com.spotify11.demo.entity.Playlist;
+import com.spotify11.demo.exception.PlaylistException;
 
 @Service
 public class UserImpl implements UserService{
@@ -104,7 +108,22 @@ public class UserImpl implements UserService{
         }
 
     }
-
+    @Override
+    public User setPlaylist(Playlist playlist1, Integer uuId) throws CurrentUserException, PlaylistException{
+        User user1 = userRepo.getById(uuId);
+        if(user1 != null){
+            if(playlist1 != null){
+                user1.setPlaylist(playlist1);
+                userRepo.save(user1);
+                return user1;
+            }else{
+                throw new PlaylistException("Playlist is null");
+            }
+        }
+        else{
+            throw new CurrentUserException("User is Null");
+        }
+    }
     @Override
     public CurrentUserSession logIn(Login logIn) throws CurrentUserException {
 
@@ -159,12 +178,6 @@ public class UserImpl implements UserService{
         return str.toString();
     }
     private User getUser(String uuId){
-        Optional<CurrentUserSession> optionalSession = sessionRepo.findByUuId(uuId);
-        if(optionalSession.isPresent()){
-            CurrentUserSession session = optionalSession.get();
-            Optional<User> optionalUser = userRepo.findById(session.getUserId());
-            return optionalUser.get();
-        }
-        return null;
+        return getUser(uuId, sessionRepo, userRepo);
     }
 }

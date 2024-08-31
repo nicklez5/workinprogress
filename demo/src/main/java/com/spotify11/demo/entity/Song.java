@@ -16,7 +16,6 @@ public class Song {
     @Column
     private String title;
     private String artist;
-    private Duration duration;
     private File song_file;
     public Song(){
 
@@ -53,13 +52,6 @@ public class Song {
         this.artist = artist;
     }
 
-    public Duration getDuration() {
-        return duration;
-    }
-
-    public void setDuration(Duration duration) {
-        this.duration = duration;
-    }
 
     public File getSong_file() {
         return song_file;
@@ -71,6 +63,6 @@ public class Song {
 
     @Override
     public String toString(){
-        return "Song(Song ID: " + this.song_id + "  " + "Title: " + this.title + "  " +  "Artist: " + this.artist + "  " + "Duration: " + this.duration.toString() + "  " + "File: " + this.song_file.getName();
+        return "Song(Song ID: " + this.song_id + "  " + "Title: " + this.title + "  " +  "Artist: " + this.artist + "  " + "File: " + this.song_file.getName();
     }
 }

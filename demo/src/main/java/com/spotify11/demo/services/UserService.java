@@ -8,6 +8,9 @@ import com.spotify11.demo.exception.UserException;
 
 import java.util.List;
 
+import com.spotify11.demo.entity.Playlist;
+import com.spotify11.demo.exception.PlaylistException;
+
 public interface UserService {
     //public String addUser();
     public User addUser(User user) throws UserException;
@@ -17,4 +20,5 @@ public interface UserService {
     public User deleteUser(String uuId, Integer id) throws CurrentUserException, UserException;
     public CurrentUserSession logIn(Login logIn) throws CurrentUserException;
     public String logOut(String uuId) throws CurrentUserException;
+    public User setPlaylist(Playlist playlist1, Integer uuId) throws CurrentUserException, PlaylistException;
 }
