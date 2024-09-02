@@ -1,6 +1,7 @@
 package com.spotify11.demo.controller;
 
 
+import java.util.List;
 import java.util.Optional;
 
 import com.spotify11.demo.exception.CurrentUserException;
@@ -8,6 +9,7 @@ import com.spotify11.demo.exception.LibraryException;
 import com.spotify11.demo.repo.SessionRepo;
 import com.spotify11.demo.repo.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,31 +24,53 @@ import com.spotify11.demo.services.LibraryService;
 @RestController
 @RequestMapping("library")
 public class LibraryController {
-
     @Autowired
-    private LibraryService libraryService;
+    private final LibraryService libraryService;
+    public LibraryController(LibraryService libraryService) {
 
-    @Autowired
-    private UserRepo userRepo;
+        this.libraryService = libraryService;
+    }
 
-    @Autowired
-    private SessionRepo sessionRepo;
+
 
     @PostMapping("/{uuId}/add")
-    public ResponseEntity<String> addSong(@RequestBody Song song,@PathVariable("uuId") String uuId) throws SongException, CurrentUserException, LibraryException {
-        if(song != null){
-            Library library = libraryService.addSong(song, uuId);
-            String message = song.toString();
-            return ResponseEntity.status(HttpStatus.CREATED).body(message);
-        }else{
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Something went wrong");
-        }
+    public ResponseEntity<Library> addSong(@RequestBody Song song, @PathVariable("uuId") String uuId) throws SongException, CurrentUserException, LibraryException {
+        Library message = libraryService.addSong(song, uuId);
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.add("info", "Added song: " + song.getTitle() + " to library");
+        ResponseEntity<Library> entity = new ResponseEntity<>(message, httpHeaders, HttpStatus.CREATED);
+        return entity;
+    }
+
+    @DeleteMapping("/{uuId}/delete")
+    public ResponseEntity<Library> deleteSong(@RequestBody Song song, @PathVariable("uuId") String uuId) throws CurrentUserException, LibraryException {
+        Library message = libraryService.deleteSong(uuId, song);
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.add("info", "Deleted song: " + song.getTitle() + " from library");
+        ResponseEntity<Library> entity = new ResponseEntity<>(message, httpHeaders, HttpStatus.CREATED);
+        return entity;
 
     }
 
-    private User getUser(String uuId){
-        return getUser(uuId, sessionRepo, userRepo);
+
+    @GetMapping("/{uuId}/info")
+    public ResponseEntity<String> getLibrary(@PathVariable("uuId") String uuId) throws CurrentUserException, LibraryException {
+        List<Song> xyz = libraryService.getLibrary(uuId);
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.add("info", "Library found");
+        ResponseEntity<String> entity = new ResponseEntity<>(xyz.toString(), httpHeaders, HttpStatus.OK);
+        return entity;
     }
+    @DeleteMapping("/{uuId}/clear")
+    public ResponseEntity<Library> clearLibrary(@PathVariable("uuId") String uuId) throws CurrentUserException, LibraryException {
+        Library xyz = libraryService.clearLibrary(uuId);
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.add("info", "Library cleared");
+        ResponseEntity<Library> entity = new ResponseEntity<>(xyz, httpHeaders, HttpStatus.OK);
+        return entity;
+
+
+}
 
 }
 

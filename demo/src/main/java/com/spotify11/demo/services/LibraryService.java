@@ -1,14 +1,16 @@
 package com.spotify11.demo.services;
 
-import java.util.List;
-
 import com.spotify11.demo.entity.Library;
 import com.spotify11.demo.entity.Song;
 import com.spotify11.demo.exception.*;
+
+import java.util.List;
+
 public interface LibraryService {
-    public Library addSong(Song song, String uuId) throws LibraryException, CurrentUserException, SongException;
-    public Library updateSongs(Library library, String uuId)  throws CurrentUserException;
-    public List<Song> getAllSongs(String uuId) throws CurrentUserException;
-    public Library deleteSong(String uuId, Song song1) throws CurrentUserException;
-    
+    Library addSong(Song song, String uuId) throws LibraryException, CurrentUserException, SongException;
+    Library deleteSong(String uuId, Song song1) throws CurrentUserException;
+    List<Song> getLibrary(String uuId) throws CurrentUserException;
+    Library clearLibrary(String uuId) throws CurrentUserException;
+
+
 }

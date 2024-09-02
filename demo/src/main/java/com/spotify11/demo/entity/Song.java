@@ -1,68 +1,48 @@
 package com.spotify11.demo.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.annotation.Nullable;
+import jakarta.persistence.*;
+import lombok.*;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.time.Duration;
 
+@Setter
+@Getter
 @Entity
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name="songs")
 public class Song {
+
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int song_id;
-    @Column
     private String title;
     private String artist;
-    private File song_file;
-    public Song(){
 
-    }
-    public Song(int song_id, String title, String artist, File song_file) {
-        this.song_id = song_id;
+
+
+    public Song(Integer id,String title, String artist,Files file) {
+        this.song_id = id;
         this.title = title;
         this.artist = artist;
-        this.song_file = song_file;
+        this.file = file;
 
     }
 
-    public int getSong_id() {
-        return song_id;
-    }
-
-    public void setSong_id(int song_id) {
-        this.song_id = song_id;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getArtist() {
-        return artist;
-    }
-
-    public void setArtist(String artist) {
-        this.artist = artist;
-    }
+    @OneToOne(fetch=FetchType.EAGER,cascade = CascadeType.PERSIST)
+    @JoinColumn(name="FILE_ID")
+    private Files file;
 
 
-    public File getSong_file() {
-        return song_file;
-    }
 
-    public void setSong_file(File song_file) {
-        this.song_file = song_file;
-    }
+
 
     @Override
     public String toString(){
-        return "Song(Song ID: " + this.song_id + "  " + "Title: " + this.title + "  " +  "Artist: " + this.artist + "  " + "File: " + this.song_file.getName();
+        return "Song(Song ID: " + this.song_id + "  " + "Title: " + this.title + "  " +  "Artist: " + this.artist + "  " + "Data: " + this.file.getName() + ")";
     }
 }

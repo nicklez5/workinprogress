@@ -11,6 +11,7 @@ import com.spotify11.demo.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,16 +20,23 @@ import java.util.List;
 @RequestMapping("user")
 public class UserController {
 
-    @Autowired
-    private UserService userService;
-    
-    @Autowired
-    private UserRepo userRepo;
+    public UserController(UserRepo userRepo, UserService userService) {
+        this.userRepo = userRepo;
+        this.userService = userService;
 
+    }
+    @Autowired
+    private final UserService userService;
+    @Autowired
+    private final UserRepo userRepo;
+
+    @Validated
     @PostMapping("/add")
-    public ResponseEntity<User> addUser(@RequestBody User user) throws UserException {
+    public ResponseEntity<String> addUser(@RequestBody User user) throws UserException {
         User user1 = userService.addUser(user);
-        return new ResponseEntity<User>(user1, HttpStatus.CREATED);
+
+        String xyz = user1.toString();
+        return new ResponseEntity<String>(xyz, HttpStatus.CREATED);
     }
 //    @PostMapping("/add")
 //    public ResponseEntity<String> addUser() throws UserException {
@@ -37,8 +45,8 @@ public class UserController {
 
     @GetMapping("/all")
     public ResponseEntity<List<User>> getAllUsers() throws UserException {
-        List<User> userList = userRepo.findAll();
-        return new ResponseEntity<List<User>>(userList, HttpStatus.OK);
+        List<User> userList = (List<User>) userRepo.findAll();
+        return new ResponseEntity<>(userList, HttpStatus.OK);
     }
 //    @PostMapping("/add")
 //    public ResponseEntity<User> addUser(@RequestBody User user) throws UserException {
@@ -47,32 +55,36 @@ public class UserController {
 //    }
 //
     @PutMapping("/update/{uuId}/{id}")
-    public ResponseEntity<User> updateUser(@RequestBody User user, @PathVariable("uuId") String uuId,Integer id) throws CurrentUserException{
+    public ResponseEntity<String> updateUser(@RequestBody User user, @PathVariable("uuId") String uuId,Integer id) throws CurrentUserException{
         User user1 = userService.updateUser(user,uuId);
-        return new ResponseEntity<User>(user1, HttpStatus.OK);
+        String xyz = user1.toString();
+        return new ResponseEntity<String>(xyz, HttpStatus.OK);
     }
 
     @DeleteMapping("/delete/{uuId}/{id}")
-    public ResponseEntity<User> deleteUser(@PathVariable("uuId") String uuId, @PathVariable("id") Integer id) throws CurrentUserException, UserException {
+    public ResponseEntity<String> deleteUser(@PathVariable("uuId") String uuId, @PathVariable("id") Integer id) throws CurrentUserException, UserException {
         User user1 = userService.deleteUser(uuId,id);
-        return new ResponseEntity<User>(user1, HttpStatus.OK);
+        String xyz = user1.toString();
+        xyz += "has been deleted";
+        return new ResponseEntity<String>(xyz, HttpStatus.OK);
     }
 
     @GetMapping("/read/{uuId}")
-    public ResponseEntity<User> readUser(@PathVariable("uuId") String uuId) throws CurrentUserException{
+    public ResponseEntity<String> readUser(@PathVariable("uuId") String uuId) throws CurrentUserException{
         User user1 = userService.readUser(uuId);
-        return new ResponseEntity<User>(user1, HttpStatus.OK);
+        String xyz = user1.toString();
+        return new ResponseEntity<String>(xyz, HttpStatus.OK);
     }
 
     @PostMapping("/login")
     public ResponseEntity<CurrentUserSession> logIn(@RequestBody Login logIn) throws CurrentUserException{
         CurrentUserSession session = userService.logIn(logIn);
-        return new ResponseEntity<CurrentUserSession>(session,HttpStatus.OK);
+        return new ResponseEntity<>(session, HttpStatus.OK);
     }
     @DeleteMapping("/logout/{uuId}")
     public ResponseEntity<String> logOut(@PathVariable("uuId") String uuId) throws CurrentUserException{
         String message = userService.logOut(uuId);
-        return new ResponseEntity<String>(message, HttpStatus.OK);
+        return new ResponseEntity<>(message, HttpStatus.OK);
     }
     
 

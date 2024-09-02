@@ -1,30 +1,26 @@
 package com.spotify11.demo.services;
 
 import com.spotify11.demo.entity.Song;
-import com.spotify11.demo.exception.CurrentUserException;
 import com.spotify11.demo.exception.SongException;
 import com.spotify11.demo.exception.UserException;
 
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.time.Duration;
+import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 
-import org.springframework.web.multipart.MultipartException;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface SongService {
-    public Song createSong(Integer song_id,String title, String artist, File song_file) throws FileNotFoundException;
-    public String readSong(Song song) throws SongException;
-    public Song updateSong(String title, String artist, Duration duration, File songFile, Integer song_id) throws SongException, FileNotFoundException;
-    public void deleteSong(Song song) throws SongException;
-    public List<Song> getSongs() throws SongException;
-    public Song getSong(int id) throws SongException;
-    public Song getSong(String title) throws SongException;
-   
 
 
-
-
-
+    Song createSong(String title, String artist, MultipartFile file, String uuId) throws  UserException, Exception;
+    Song readSong(String fileName, String uuId) throws UserException;
+    Song updateSong(String title, String artist, MultipartFile file, Integer song_id, String uuId) throws UserException,  SongException, FileNotFoundException, IOException;
+    String addFileToLibrary(MultipartFile file) throws IOException;
+    byte[] getFilefromSong(Song song1);
+    byte[] downloadFileFromLibrary(String fileName) throws IOException;
+    void deleteSong(Song song, String uuId) throws UserException, SongException;
+    Song getSong(int id, String uuId) throws  UserException,SongException;
+    Song getSong(String title, String uuId) throws  UserException,SongException;
+    List<Song> getAllSongs(String uuId) throws UserException, SongException;
 }

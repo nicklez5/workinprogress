@@ -1,112 +1,72 @@
 package com.spotify11.demo.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.springframework.stereotype.Component;
+import org.springframework.validation.annotation.Validated;
 
-import com.spotify11.demo.entity.Library;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
-@Entity
+import static java.lang.Integer.parseInt;
+
 @Data
+@Entity
 @AllArgsConstructor
 @NoArgsConstructor
+@Component
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name="User_ID")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer userId;
+
     private String name;
     private String password;
     private String email;
     private String role;
 
-    public User(Integer userId, String name, String email, String password,String role) {
+    public User(String name, String email, String password,String role) {
         super();
-        this.userId = userId;
         this.name = name;
         this.email = email;
         this.password = password;
         this.role = role;
     }
 
+    @OneToOne(fetch=FetchType.LAZY, cascade=CascadeType.ALL)
+    @JoinColumn(name="LIBRARY_ID")
+    private Library library = new Library();
 
-    @ManyToOne
-    @JoinColumns({
-            @JoinColumn(name="library_id",referencedColumnName = "LIBRARY_ID")
-    })
-    private Library library;
 
-    @ManyToOne
-    @JoinColumns({
-            @JoinColumn(name="playlist_id", referencedColumnName="PLAYLIST_ID"),
-    })
-    private Playlist playlist;
+    @OneToMany(fetch=FetchType.LAZY, cascade=CascadeType.ALL)
+    @JoinColumn(name="PLAYLIST_ID")
+    private List<Playlist> playlist = new ArrayList<>();
 
+
+    public Integer randomId(){
+        Random rand = new Random();
+        int n = rand.nextInt(1000);
+        n += 1;
+        return n;
+    }
     public Integer getId(){
         return userId;
     }
     public void setId(Integer id){
         this.userId = id;
     }
-    public String getName() {
-        return name;
+
+
+
+    public Playlist getPlaylist(Integer id) {
+        return playlist.get(id);
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-
-    @Override
-    public String toString() {
-        return "User{" +
-                "userId=" + userId +
-                ", name='" + name + '\'' +
-                ", password='" + password + '\'' +
-                ", email='" + email + '\'' +
-                ", role='" + role + '\'' +
-                ", library=" + library +
-                ", playlist=" + playlist +
-                '}';
-    }
-
-    public String getRole() {
-        return role;
-    }
-
-    public void setRole(String role) {
-        this.role = role;
-    }
-
-    public Library getLibrary() {
-        return this.library;
-    }
-
-    public Playlist getPlaylist() {
-        return playlist;
-    }
-
-    public void setPlaylist(Playlist playlist) {
-        this.playlist = playlist;
+    public void addPlaylist(Playlist playlist) {
+        this.playlist.add(playlist);
     }
 
 }

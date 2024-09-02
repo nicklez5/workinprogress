@@ -2,6 +2,7 @@ package com.spotify11.demo.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import org.springframework.validation.annotation.Validated;
 
 @Entity
 public class CurrentUserSession {
@@ -31,7 +32,7 @@ public class CurrentUserSession {
     }
 
     public Integer getUserId() {
-        return userId;
+        return this.userId;
     }
 
     public void setUserId(Integer userId) {

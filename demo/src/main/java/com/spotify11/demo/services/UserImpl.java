@@ -1,31 +1,36 @@
 package com.spotify11.demo.services;
 
-import com.spotify11.demo.entity.CurrentUserSession;
-import com.spotify11.demo.entity.Login;
-import com.spotify11.demo.entity.User;
+import com.spotify11.demo.entity.*;
 import com.spotify11.demo.exception.CurrentUserException;
 import com.spotify11.demo.exception.UserException;
+import com.spotify11.demo.repo.LibraryRepo;
+import com.spotify11.demo.repo.PlaylistRepo;
 import com.spotify11.demo.repo.SessionRepo;
 import com.spotify11.demo.repo.UserRepo;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
-import com.spotify11.demo.entity.Playlist;
-import com.spotify11.demo.exception.PlaylistException;
-
 @Service
-public class UserImpl implements UserService{
+public class UserImpl implements UserService {
 
     @Autowired
-    private UserRepo userRepo;
-
+    private final UserRepo userRepo;
     @Autowired
-    private SessionRepo sessionRepo;
+    private final SessionRepo sessionRepo;
+
+
+    public UserImpl( UserRepo userRepo, SessionRepo sessionRepo) {
+
+        this.userRepo = userRepo;
+        this.sessionRepo = sessionRepo;
+
+    }
 
 //    @Override
 //    public String addUser(){
@@ -34,8 +39,12 @@ public class UserImpl implements UserService{
     @Override
     public User addUser(User user) throws UserException {
         if(user.getRole().equals("ADMIN") || user.getRole().equals("USER")) {
-            User user1 = userRepo.save(user);
-            return user1;
+            Library library1 = new Library();
+            List<Playlist> playlist1 = new ArrayList<>();
+            user.setLibrary(library1);
+            user.setPlaylist(playlist1);
+            userRepo.save(user);
+            return user;
         }
         else{
             throw new UserException("Enter correct role");
@@ -44,8 +53,7 @@ public class UserImpl implements UserService{
     }
     @Override
     public List<User> getAllUser() {
-        List<User> userList = userRepo.findAll();
-        return userList;
+        return (List<User>) userRepo.findAll();
     }
     @Override
     public User updateUser(User user, String uuId) throws CurrentUserException {
@@ -70,14 +78,22 @@ public class UserImpl implements UserService{
 
     }
 
+    private User getUser(String uuId) {
+        Optional<CurrentUserSession> optionalSession = sessionRepo.findByUuId(uuId);
+        if(optionalSession.isPresent()){
+            CurrentUserSession currentUserSession = optionalSession.get();
+            Optional<User> optionalUser = userRepo.findById(currentUserSession.getUserId());
+            if(optionalUser.isPresent()){
+                return optionalUser.get();
+            }
+        }
+        return null;
+
+    }
+
     @Override
     public User readUser(String uuId) throws CurrentUserException {
-        User user = this.getUser(uuId);
-        if(user != null){
-            return user;
-        }else{
-            throw new CurrentUserException("User is not present");
-        }
+        return this.getUser(uuId);
 
     }
     // id is the one we are looking to delete
@@ -85,45 +101,26 @@ public class UserImpl implements UserService{
     @Override
     public User deleteUser(String uuId,Integer id) throws CurrentUserException, UserException {
         User user = this.getUser(uuId);
-        if(user != null){
-            if(user.getRole().equals("ADMIN")){
-                Optional<User> optionalUser = userRepo.findById(id);
-                if(optionalUser.isPresent()){
-                    User user1 = optionalUser.get();
-                    Optional <CurrentUserSession> optionalSession = sessionRepo.findById(user1.getEmail());
-                    if(optionalSession.isPresent()){
-                        this.logOut(optionalSession.get().getUuId());
-                    }
-                    userRepo.delete(user1);
-                    return user1;
-                }else{
-                    throw new UserException("Wrong id");
+        if (user.getRole().equals("ADMIN")) {
+            Optional<User> optionalUser = userRepo.findById(id);
+            if (optionalUser.isPresent()) {
+                User user1 = optionalUser.get();
+                Optional<CurrentUserSession> optionalSession = sessionRepo.findById(user1.getEmail());
+                if (optionalSession.isPresent()) {
+                    this.logOut(optionalSession.get().getUuId());
                 }
-            }else{
-                throw new UserException("You dont have access");
-            }
-
-        }else{
-            throw new CurrentUserException("User is not present");
-        }
-
-    }
-    @Override
-    public User setPlaylist(Playlist playlist1, Integer uuId) throws CurrentUserException, PlaylistException{
-        User user1 = userRepo.getById(uuId);
-        if(user1 != null){
-            if(playlist1 != null){
-                user1.setPlaylist(playlist1);
-                userRepo.save(user1);
+                userRepo.delete(user1);
                 return user1;
-            }else{
-                throw new PlaylistException("Playlist is null");
+            } else {
+                throw new UserException("Wrong id");
             }
+        } else {
+            throw new UserException("You dont have access");
         }
-        else{
-            throw new CurrentUserException("User is Null");
-        }
+
     }
+
+
     @Override
     public CurrentUserSession logIn(Login logIn) throws CurrentUserException {
 
@@ -132,11 +129,11 @@ public class UserImpl implements UserService{
             User user = optionalUser.get();
             if(user.getPassword().equals(logIn.getPassword())){
                 Optional<CurrentUserSession> optionalSession = sessionRepo.findById(logIn.getEmail());
-
                 if(optionalSession.isEmpty()){
                     String key = this.randomString();
                     CurrentUserSession session = new CurrentUserSession(logIn.getEmail(),user.getId(),key);
                     return sessionRepo.save(session);
+
                 }else{
                     throw new CurrentUserException("User already present");
                 }
@@ -177,7 +174,5 @@ public class UserImpl implements UserService{
         }
         return str.toString();
     }
-    private User getUser(String uuId){
-        return getUser(uuId, sessionRepo, userRepo);
-    }
+
 }

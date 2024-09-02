@@ -2,40 +2,35 @@ package com.spotify11.demo.entity;
 
 import com.spotify11.demo.exception.SongException;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import com.spotify11.demo.entity.Song;
+import org.springframework.validation.annotation.Validated;
+
 import java.util.ArrayList;
 import java.util.List;
 
+@Getter
 @Entity
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(name="library")
 public class Library {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int library_id;
-    @Column(unique=false)
+    @Column(name="LIBRARY_ID")
+    private int libraryId;
+
+
     @OneToMany
     private List<Song> songs;
-    
+
     public Library(int id) {
         super();
-        this.library_id = id;
+        this.libraryId = id;
         this.songs = new ArrayList<Song>();
-    }
-
-    public int getId() {
-        return library_id;
-    }
-    public void setId(int id) {
-        this.library_id = id;
-    }
-    public List<Song> getSongs() {
-        return this.songs;
     }
 
     public void addSong(Song song) {
@@ -44,6 +39,8 @@ public class Library {
     public void removeSong(Song song) {
         this.songs.remove(song);
     }
-    
+    public String toString(){
+        return "Library Id: " + libraryId + " Songs: " + songs;
+    }
 
 }
