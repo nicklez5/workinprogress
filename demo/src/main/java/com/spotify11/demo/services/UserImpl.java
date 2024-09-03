@@ -8,6 +8,7 @@ import com.spotify11.demo.repo.PlaylistRepo;
 import com.spotify11.demo.repo.SessionRepo;
 import com.spotify11.demo.repo.UserRepo;
 
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -36,7 +37,7 @@ public class UserImpl implements UserService {
 //    public String addUser(){
 //        return "Fake";
 //    }
-    @Override
+    @Transactional
     public User addUser(User user) throws UserException {
         if(user.getRole().equals("ADMIN") || user.getRole().equals("USER")) {
             Library library1 = new Library();
@@ -51,11 +52,11 @@ public class UserImpl implements UserService {
         }
 
     }
-    @Override
+
     public List<User> getAllUser() {
         return (List<User>) userRepo.findAll();
     }
-    @Override
+    @Transactional
     public User updateUser(User user, String uuId) throws CurrentUserException {
         User user1 = this.getUser(uuId);
         if(user1 != null && user.getRole() != null){
@@ -98,7 +99,7 @@ public class UserImpl implements UserService {
     }
     // id is the one we are looking to delete
     // uuID is the parent
-    @Override
+    @Transactional
     public User deleteUser(String uuId,Integer id) throws CurrentUserException, UserException {
         User user = this.getUser(uuId);
         if (user.getRole().equals("ADMIN")) {
@@ -121,7 +122,7 @@ public class UserImpl implements UserService {
     }
 
 
-    @Override
+    @Transactional
     public CurrentUserSession logIn(Login logIn) throws CurrentUserException {
 
         Optional<User> optionalUser = userRepo.findByEmail(logIn.getEmail());
@@ -146,7 +147,7 @@ public class UserImpl implements UserService {
 
     }
 
-    @Override
+    @Transactional
     public String logOut(String uuId) throws CurrentUserException {
         Optional<CurrentUserSession> optionalSession = sessionRepo.findByUuId(uuId);
 

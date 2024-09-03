@@ -1,31 +1,32 @@
 package com.spotify11.demo.services;
 
+import com.spotify11.demo.entity.CurrentUserSession;
+import com.spotify11.demo.entity.Playlist;
+import com.spotify11.demo.entity.Song;
+import com.spotify11.demo.entity.User;
+import com.spotify11.demo.exception.CurrentUserException;
+import com.spotify11.demo.exception.PlaylistException;
+import com.spotify11.demo.exception.SongException;
+import com.spotify11.demo.exception.UserException;
+import com.spotify11.demo.repo.PlaylistRepo;
+import com.spotify11.demo.repo.SessionRepo;
+import com.spotify11.demo.repo.UserRepo;
+import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-
-import com.spotify11.demo.entity.CurrentUserSession;
-import com.spotify11.demo.exception.CurrentUserException;
-import com.spotify11.demo.repo.PlaylistRepo;
-import com.spotify11.demo.repo.SessionRepo;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import com.spotify11.demo.entity.Playlist;
-import com.spotify11.demo.entity.Song;
-import com.spotify11.demo.entity.User;
-import com.spotify11.demo.exception.PlaylistException;
-import com.spotify11.demo.exception.SongException;
-import com.spotify11.demo.exception.UserException;
-
-import com.spotify11.demo.repo.UserRepo;
-
 @Service
 public class PlaylistImpl implements PlaylistService {
 
+    @Autowired
     private final UserRepo userRepo;
+    @Autowired
     private final SessionRepo sessionRepo;
+    @Autowired
     private final PlaylistRepo playlistRepo;
     
     public PlaylistImpl(UserRepo userRepo, SessionRepo sessionRepo, PlaylistRepo playlistRepo) {
@@ -34,7 +35,7 @@ public class PlaylistImpl implements PlaylistService {
         this.playlistRepo = playlistRepo;
     }
 
-    @Override
+    @Transactional
     public Playlist addSong(Song song, String uuId, Integer id) throws CurrentUserException, SongException, UserException {
         Optional<CurrentUserSession> currentUserSessionOptional = sessionRepo.findByUuId(uuId);
         if (currentUserSessionOptional.isPresent()) {
@@ -62,7 +63,7 @@ public class PlaylistImpl implements PlaylistService {
 
     }
 
-    @Override
+    @Transactional
     public Playlist removeSong(Song song, String uuId,Integer id) throws SongException, UserException, CurrentUserException {
         Optional<CurrentUserSession> currentUserSessionOptional = sessionRepo.findByUuId(uuId);
         if (currentUserSessionOptional.isPresent()) {
@@ -86,7 +87,7 @@ public class PlaylistImpl implements PlaylistService {
         }
 
     }
-    @Override
+
     public Playlist readPlaylist(String uuId, Integer id) throws UserException, CurrentUserException {
         Optional<CurrentUserSession> currentUserSessionOptional = sessionRepo.findByUuId(uuId);
         if (currentUserSessionOptional.isPresent()) {
@@ -107,7 +108,7 @@ public class PlaylistImpl implements PlaylistService {
 
 
 
-    @Override
+    @Transactional
     public String deletePlaylist(String uuId,Integer id) throws PlaylistException, UserException,CurrentUserException {
         Optional<CurrentUserSession> currentUserSessionOptional = sessionRepo.findByUuId(uuId);
         if (currentUserSessionOptional.isPresent()) {
@@ -131,7 +132,7 @@ public class PlaylistImpl implements PlaylistService {
 
     }
 
-    @Override
+    @Transactional
     public Playlist createPlaylist(String uuId, String name) throws UserException, CurrentUserException {
         Optional<CurrentUserSession> currentUserSession = sessionRepo.findByUuId(uuId);
         if (currentUserSession.isPresent()) {
@@ -153,7 +154,7 @@ public class PlaylistImpl implements PlaylistService {
 
     }
 
-    @Override
+    @Transactional
     public Playlist renamePlaylist(String uuId,Integer id, String name) throws UserException, CurrentUserException {
         Optional<CurrentUserSession> currentUserSessionOptional = sessionRepo.findByUuId(uuId);
         if (currentUserSessionOptional.isPresent()) {
@@ -175,7 +176,7 @@ public class PlaylistImpl implements PlaylistService {
 
     }
 
-    @Override
+    @Transactional
     public String clearPlaylist(String uuId, Integer id) throws UserException, CurrentUserException {
         Optional<CurrentUserSession> currentUserSessionOptional = sessionRepo.findByUuId(uuId);
         if (currentUserSessionOptional.isPresent()) {
@@ -183,7 +184,7 @@ public class PlaylistImpl implements PlaylistService {
             Optional<User> optionalUser = userRepo.findById(currentUserSession.getUserId());
             if (optionalUser.isPresent()) {
                 User user1 = optionalUser.get();
-                user1.getPlaylist().clear();
+                user1.getPlaylist().get(id).removeAllSongs();
                 userRepo.save(user1);
                 return "Playlist: " + id + " has been cleared";
             } else {
@@ -194,7 +195,7 @@ public class PlaylistImpl implements PlaylistService {
             throw new CurrentUserException("User is not logged in");
         }
     }
-    @Override
+
     public Playlist getPlaylist(String uuId, Integer id) throws UserException,CurrentUserException {
         Optional<CurrentUserSession> currentUserSessionOptional = sessionRepo.findByUuId(uuId);
 
@@ -211,7 +212,7 @@ public class PlaylistImpl implements PlaylistService {
             throw new CurrentUserException("User is not logged in");
         }
     }
-    @Override
+
     public List<Playlist> getAllPlaylists(String uuId) throws UserException, CurrentUserException{
         Optional<CurrentUserSession> currentUserSessionOptional = sessionRepo.findByUuId(uuId);
         if (currentUserSessionOptional.isPresent()) {

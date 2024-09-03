@@ -9,7 +9,7 @@ import java.util.Optional;
 import java.util.List;
 
 
-
+@Repository
 public interface SongRepo extends CrudRepository<Song,Integer> {
     public Optional<Song>  findByTitle(String title);
     

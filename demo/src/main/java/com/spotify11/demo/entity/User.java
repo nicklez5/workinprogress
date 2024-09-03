@@ -1,15 +1,14 @@
 package com.spotify11.demo.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Component;
-import org.springframework.validation.annotation.Validated;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-
-import static java.lang.Integer.parseInt;
 
 @Data
 @Entity
@@ -19,7 +18,7 @@ import static java.lang.Integer.parseInt;
 public class User {
 
     @Id
-    @Column(name="User_ID")
+    @Column(name="USER_ID")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer userId;
 

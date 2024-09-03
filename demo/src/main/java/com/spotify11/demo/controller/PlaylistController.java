@@ -1,27 +1,19 @@
 package com.spotify11.demo.controller;
 
-import com.spotify11.demo.entity.CurrentUserSession;
 import com.spotify11.demo.entity.Playlist;
 import com.spotify11.demo.entity.Song;
-import com.spotify11.demo.entity.User;
 import com.spotify11.demo.exception.CurrentUserException;
+import com.spotify11.demo.exception.PlaylistException;
 import com.spotify11.demo.exception.SongException;
 import com.spotify11.demo.exception.UserException;
-import com.spotify11.demo.repo.PlaylistRepo;
-import com.spotify11.demo.repo.SessionRepo;
-import com.spotify11.demo.repo.SongRepo;
-import com.spotify11.demo.repo.UserRepo;
+import com.spotify11.demo.services.PlaylistService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.spotify11.demo.exception.PlaylistException;
-import com.spotify11.demo.services.PlaylistService;
-
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("playlist")
@@ -95,7 +87,7 @@ public class PlaylistController {
     public ResponseEntity<String> clearPlaylist(@PathVariable("uuId") String uuId, @PathVariable("id") Integer id) throws UserException, CurrentUserException{
         String playlist1 = playlistService.clearPlaylist(uuId,id);
         HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.add("info", "Clearing: " + playlist1);
+        httpHeaders.add("info", playlist1);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).headers(httpHeaders).body(playlist1);
     }
 

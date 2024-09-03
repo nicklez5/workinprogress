@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.stereotype.Component;
-import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
 
@@ -30,15 +29,16 @@ public class Playlist {
     @OneToMany
     private List<Song> songs;
 
-
-
     public void addSongs(Song song) {
         this.songs.add(song);
     }
     public void deleteSongs(Song song) {
         this.songs.remove(song);
     }
+    public void removeAllSongs(){
+        this.songs.clear();
 
+    }
     public String toString() {
         return "Playlist [playlist_id=" + playlist_id + ", playlist_name=" + playlist_name + ", songs=" + songs + "]";
     }

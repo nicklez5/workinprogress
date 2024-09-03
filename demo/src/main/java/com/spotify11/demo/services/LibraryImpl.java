@@ -1,11 +1,5 @@
 package com.spotify11.demo.services;
 
-import java.util.List;
-import java.util.Optional;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.spotify11.demo.entity.CurrentUserSession;
 import com.spotify11.demo.entity.Library;
 import com.spotify11.demo.entity.Song;
@@ -15,14 +9,21 @@ import com.spotify11.demo.exception.SongException;
 import com.spotify11.demo.repo.LibraryRepo;
 import com.spotify11.demo.repo.SessionRepo;
 import com.spotify11.demo.repo.UserRepo;
+import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
 @Service
 public class LibraryImpl implements LibraryService {
 
+    @Autowired
     private final UserRepo userRepo;
 
-
+    @Autowired
     private final LibraryRepo libraryRepo;
-
+    @Autowired
     private final SessionRepo sessionRepo;
 
     
@@ -32,8 +33,9 @@ public class LibraryImpl implements LibraryService {
         this.sessionRepo = sessionRepo;
     }
 
-    @Override
+    @Transactional
     public Library addSong(Song song1, String uuId) throws SongException, CurrentUserException {
+
         Optional<CurrentUserSession> currentUserSession = sessionRepo.findByUuId(uuId);
         //User user1 = sessionRepo.findByUuId(uuId).
         if (currentUserSession.isPresent()) {
@@ -63,7 +65,7 @@ public class LibraryImpl implements LibraryService {
 
 
 
-    @Override
+    @Transactional
     public Library deleteSong(String uuId, Song song1) throws CurrentUserException {
         Optional<CurrentUserSession> currentUserSession = sessionRepo.findByUuId(uuId);
         if(currentUserSession.isPresent()){
@@ -87,7 +89,7 @@ public class LibraryImpl implements LibraryService {
     }
 
 
-    @Override
+
     public List<Song> getLibrary(String uuId) throws CurrentUserException {
         Optional<CurrentUserSession> currentUserSession = sessionRepo.findByUuId(uuId);
         if(currentUserSession.isPresent()){
@@ -104,7 +106,7 @@ public class LibraryImpl implements LibraryService {
         }
     }
 
-    @Override
+    @Transactional
     public Library clearLibrary(String uuId) throws CurrentUserException {
         Optional<CurrentUserSession> currentUserSession = sessionRepo.findByUuId(uuId);
         if(currentUserSession.isPresent()){
@@ -115,7 +117,7 @@ public class LibraryImpl implements LibraryService {
                 Library library = new Library((int) this.libraryRepo.count());
                 user.setLibrary(library);
                 userRepo.save(user);
-                return library;
+                return user.getLibrary();
 
             }else{
                 throw new CurrentUserException("User is not found");
