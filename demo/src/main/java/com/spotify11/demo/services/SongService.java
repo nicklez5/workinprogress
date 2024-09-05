@@ -25,7 +25,7 @@ public interface SongService {
     Song updateSong(String title, String artist, MultipartFile file, Integer song_id, String uuId) throws UserException, SongException, IOException, FileStorageException;
     //String getSongName(String uuId, String docType) throws CurrentUserException;
     Resource loadFileAsResource(String fileName) throws FileNotFoundException;
-    void deleteSong(Song song, String uuId) throws UserException, SongException;
+    List<Song> deleteSong(int song_id, String uuId) throws UserException, SongException;
     Song getSong(int id, String uuId) throws  UserException,SongException;
     Song getSong(String title, String uuId) throws  UserException,SongException;
     List<Song> getAllSongs(String uuId) throws UserException, SongException;

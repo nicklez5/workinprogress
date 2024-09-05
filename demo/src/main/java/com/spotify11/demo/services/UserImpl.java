@@ -2,6 +2,7 @@ package com.spotify11.demo.services;
 
 import com.spotify11.demo.entity.*;
 import com.spotify11.demo.exception.CurrentUserException;
+import com.spotify11.demo.exception.PlaylistException;
 import com.spotify11.demo.exception.UserException;
 import com.spotify11.demo.repo.LibraryRepo;
 import com.spotify11.demo.repo.PlaylistRepo;
@@ -20,17 +21,17 @@ import java.util.Random;
 @Service
 public class UserImpl implements UserService {
 
-    @Autowired
     private final UserRepo userRepo;
-    @Autowired
+
+
     private final SessionRepo sessionRepo;
 
+    private final PlaylistRepo playlistRepo;
 
-    public UserImpl( UserRepo userRepo, SessionRepo sessionRepo) {
-
+    public UserImpl(UserRepo userRepo, SessionRepo sessionRepo, PlaylistRepo playlistRepo) {
         this.userRepo = userRepo;
         this.sessionRepo = sessionRepo;
-
+        this.playlistRepo = playlistRepo;
     }
 
 //    @Override
@@ -43,7 +44,7 @@ public class UserImpl implements UserService {
             Library library1 = new Library();
             List<Playlist> playlist1 = new ArrayList<>();
             user.setLibrary(library1);
-            user.setPlaylist(playlist1);
+            user.setPlaylists(playlist1);
             userRepo.save(user);
             return user;
         }
@@ -52,11 +53,12 @@ public class UserImpl implements UserService {
         }
 
     }
-
+    @Override
     public List<User> getAllUser() {
         return (List<User>) userRepo.findAll();
     }
-    @Transactional
+
+    @Override
     public User updateUser(User user, String uuId) throws CurrentUserException {
         User user1 = this.getUser(uuId);
         if(user1 != null && user.getRole() != null){
@@ -99,7 +101,7 @@ public class UserImpl implements UserService {
     }
     // id is the one we are looking to delete
     // uuID is the parent
-    @Transactional
+    @Override
     public User deleteUser(String uuId,Integer id) throws CurrentUserException, UserException {
         User user = this.getUser(uuId);
         if (user.getRole().equals("ADMIN")) {
@@ -121,8 +123,7 @@ public class UserImpl implements UserService {
 
     }
 
-
-    @Transactional
+    @Override
     public CurrentUserSession logIn(Login logIn) throws CurrentUserException {
 
         Optional<User> optionalUser = userRepo.findByEmail(logIn.getEmail());
@@ -147,7 +148,7 @@ public class UserImpl implements UserService {
 
     }
 
-    @Transactional
+    @Override
     public String logOut(String uuId) throws CurrentUserException {
         Optional<CurrentUserSession> optionalSession = sessionRepo.findByUuId(uuId);
 
@@ -160,8 +161,22 @@ public class UserImpl implements UserService {
         }
 
 
+    }
 
-
+    @Override
+    public User assignPlaylistToUser(String uuId, Integer playlist_id) throws PlaylistException {
+        List<Playlist> playlistSet = null;
+        User user = this.getUser(uuId);
+        assert user != null;
+        if(user.getRole().equals("ADMIN") || user.getRole().equals("USER")){
+            Playlist playlist = playlistRepo.findById(playlist_id).orElseThrow(null);
+            playlistSet = user.getPlaylists();
+            playlistSet.add(playlist);
+            user.setPlaylists(playlistSet);
+            userRepo.save(user);
+            return user;
+        }
+        return null;
     }
 
     private String randomString(){

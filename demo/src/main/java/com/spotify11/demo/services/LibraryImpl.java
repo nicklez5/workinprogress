@@ -18,12 +18,12 @@ import java.util.Optional;
 @Service
 public class LibraryImpl implements LibraryService {
 
-    @Autowired
+
     private final UserRepo userRepo;
 
-    @Autowired
+
     private final LibraryRepo libraryRepo;
-    @Autowired
+
     private final SessionRepo sessionRepo;
 
     
@@ -114,7 +114,7 @@ public class LibraryImpl implements LibraryService {
             Optional<User> optionalUser = userRepo.findById(userSession.getUserId());
             if(optionalUser.isPresent()){
                 User user = optionalUser.get();
-                Library library = new Library((int) this.libraryRepo.count());
+                Library library = new Library();
                 user.setLibrary(library);
                 userRepo.save(user);
                 return user.getLibrary();

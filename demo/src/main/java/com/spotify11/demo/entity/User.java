@@ -14,21 +14,26 @@ import java.util.Random;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-@Component
+@Table(name="user")
 public class User {
 
     @Id
-    @Column(name="USER_ID")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer userId;
+    private Integer id;
 
+    @Column(name = "name")
     private String name;
+
+    @Column(name = "password")
     private String password;
+
+    @Column(name = "email")
     private String email;
+
+    @Column(name = "role")
     private String role;
 
     public User(String name, String email, String password,String role) {
-        super();
         this.name = name;
         this.email = email;
         this.password = password;
@@ -36,13 +41,13 @@ public class User {
     }
 
     @OneToOne(fetch=FetchType.LAZY, cascade=CascadeType.ALL)
-    @JoinColumn(name="LIBRARY_ID")
+    @JoinColumn(name="user_library")
     private Library library = new Library();
 
 
-    @OneToMany(fetch=FetchType.LAZY, cascade=CascadeType.ALL)
-    @JoinColumn(name="PLAYLIST_ID")
-    private List<Playlist> playlist = new ArrayList<>();
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = "user_playlists", referencedColumnName = "id")
+    private List<Playlist> Playlists = new ArrayList<>();
 
 
     public Integer randomId(){
@@ -51,21 +56,25 @@ public class User {
         n += 1;
         return n;
     }
-    public Integer getId(){
-        return userId;
-    }
-    public void setId(Integer id){
-        this.userId = id;
-    }
-
-
 
     public Playlist getPlaylist(Integer id) {
-        return playlist.get(id);
+        for(Playlist p : Playlists){
+            if(p.getId().equals(id)){
+                return p;
+            }
+        }
+        return this.Playlists.get(id);
     }
 
     public void addPlaylist(Playlist playlist) {
-        this.playlist.add(playlist);
+        this.Playlists.add(playlist);
     }
+    public void removePlaylist(Playlist playlist){
+        this.Playlists.remove(playlist);
+    }
+    public void setPlaylist(Playlist playlist){
+        this.Playlists.set(playlist.getId(), playlist);
+    }
+
 
 }

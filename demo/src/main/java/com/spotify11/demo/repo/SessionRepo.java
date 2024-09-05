@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 import com.spotify11.demo.entity.CurrentUserSession;
 
 @Repository
-public interface SessionRepo extends CrudRepository<CurrentUserSession,String> {
+public interface SessionRepo extends JpaRepository<CurrentUserSession,String> {
 
         Optional<CurrentUserSession> findByUuId(String uuId);
 }

@@ -20,18 +20,15 @@ public class Library {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="LIBRARY_ID")
-    private int libraryId;
+    private int id;
 
 
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn( name = "lib_songs", referencedColumnName = "id")
     private List<Song> songs;
 
-    public Library(int id) {
-        super();
-        this.libraryId = id;
-        this.songs = new ArrayList<Song>();
-    }
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL,mappedBy = "library")
+    private User user;
 
     public void addSong(Song song) {
         this.songs.add(song);
@@ -40,7 +37,7 @@ public class Library {
         this.songs.remove(song);
     }
     public String toString(){
-        return "Library Id: " + libraryId + " Songs: " + songs;
+        return "Library Id: " + id + " Songs: " + songs;
     }
 
 }

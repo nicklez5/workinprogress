@@ -18,6 +18,6 @@ public interface UserService {
     User deleteUser(String uuId, Integer id) throws CurrentUserException, UserException;
     CurrentUserSession logIn(Login logIn) throws CurrentUserException;
     String logOut(String uuId) throws CurrentUserException;
-
+    User assignPlaylistToUser(String uuId, Integer playlist_id) throws PlaylistException;
 
 }

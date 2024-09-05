@@ -11,6 +11,7 @@ import com.spotify11.demo.exception.UserException;
 import com.spotify11.demo.repo.PlaylistRepo;
 import com.spotify11.demo.repo.SessionRepo;
 import com.spotify11.demo.repo.UserRepo;
+import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,32 +23,34 @@ import java.util.Optional;
 @Service
 public class PlaylistImpl implements PlaylistService {
 
-    @Autowired
+
+
     private final UserRepo userRepo;
-    @Autowired
+
     private final SessionRepo sessionRepo;
-    @Autowired
+
     private final PlaylistRepo playlistRepo;
     
     public PlaylistImpl(UserRepo userRepo, SessionRepo sessionRepo, PlaylistRepo playlistRepo) {
         this.userRepo = userRepo;
         this.sessionRepo = sessionRepo;
         this.playlistRepo = playlistRepo;
+
     }
 
     @Transactional
-    public Playlist addSong(Song song, String uuId, Integer id) throws CurrentUserException, SongException, UserException {
+    public Playlist addSong(Integer song_id,String uuId, Integer playlist_id) throws CurrentUserException, SongException, UserException {
         Optional<CurrentUserSession> currentUserSessionOptional = sessionRepo.findByUuId(uuId);
         if (currentUserSessionOptional.isPresent()) {
             CurrentUserSession currentUserSession = currentUserSessionOptional.get();
             Optional<User> optionalUser = userRepo.findById(currentUserSession.getUserId());
             if (optionalUser.isPresent()) {
                 User user1 = optionalUser.get();
-                Playlist playlist1 = playlistRepo.findById(id).orElse(null);
-                if(song != null){
-
-                    user1.getPlaylist().get(id).addSongs(song);
-                    userRepo.save(user1);
+                Playlist playlist1 = playlistRepo.findById(playlist_id).get();
+                Song song1 = user1.getLibrary().getSongs().get(song_id);
+                if(song1 != null && playlist1 != null) {
+                    playlist1.getSongs().add(song1);
+                    playlistRepo.save(playlist1);
                     return playlist1;
 
                 }else{
@@ -64,87 +67,94 @@ public class PlaylistImpl implements PlaylistService {
     }
 
     @Transactional
-    public Playlist removeSong(Song song, String uuId,Integer id) throws SongException, UserException, CurrentUserException {
+    public Playlist removeSong(Integer song_id, String uuId,Integer playlist_id) throws SongException, UserException, CurrentUserException {
         Optional<CurrentUserSession> currentUserSessionOptional = sessionRepo.findByUuId(uuId);
         if (currentUserSessionOptional.isPresent()) {
             CurrentUserSession currentUserSession = currentUserSessionOptional.get();
             Optional<User> optionalUser = userRepo.findById(currentUserSession.getUserId());
             if (optionalUser.isPresent()) {
                 User user1 = optionalUser.get();
-                Playlist playlist1 = playlistRepo.findById(id).get();
-                if(song != null){
-                    user1.getPlaylist().get(id).getSongs().remove(song);
-                    userRepo.save(user1);
+                Playlist playlist1 = null;
+                playlist1 = playlistRepo.findById(playlist_id).orElse(null);
+                Song song1 = user1.getLibrary().getSongs().get(song_id);
+                if (song1 != null && playlist1 != null) {
+                    playlist1.getSongs().remove(song1);
+                    playlistRepo.save(playlist1);
                     return playlist1;
-                }else{
-                    throw new SongException("Song id: " + id + " does not exist");
+                } else {
+                    throw new SongException("Song id: " + song_id + " does not exist or playlist id: " + playlist_id + " does not exist");
                 }
-            }else{
-                throw new UserException("User uuId: " + uuId + " is not present");
+            } else {
+                throw new UserException("User id: " + uuId + " does not exist or not logged in");
             }
-        }else{
-            throw new CurrentUserException("User uuId:" + uuId + " is not present or does not exist");
+        } else {
+            throw new CurrentUserException("User id: " + uuId + " does not exist or not logged in");
+
         }
-
     }
-
-    public Playlist readPlaylist(String uuId, Integer id) throws UserException, CurrentUserException {
+    @Override
+    public Playlist readPlaylist(String uuId, Integer playlist_id) throws UserException, CurrentUserException {
         Optional<CurrentUserSession> currentUserSessionOptional = sessionRepo.findByUuId(uuId);
         if (currentUserSessionOptional.isPresent()) {
             CurrentUserSession currentUserSession = currentUserSessionOptional.get();
             Optional<User> optionalUser = userRepo.findById(currentUserSession.getUserId());
             if (optionalUser.isPresent()) {
                 User user1 = optionalUser.get();
-                return user1.getPlaylist(id);
+                return user1.getPlaylist(playlist_id);
 
-            }else{
-                throw new UserException("User: " + id +  "does not exist");
-            }
-        }else{
-            throw new CurrentUserException("User is not logged in");
-        }
-    }
-
-
-
-
-    @Transactional
-    public String deletePlaylist(String uuId,Integer id) throws PlaylistException, UserException,CurrentUserException {
-        Optional<CurrentUserSession> currentUserSessionOptional = sessionRepo.findByUuId(uuId);
-        if (currentUserSessionOptional.isPresent()) {
-            CurrentUserSession currentUserSession = currentUserSessionOptional.get();
-            Optional<User> optionalUser = userRepo.findById(currentUserSession.getUserId());
-            if (optionalUser.isPresent()) {
-                User user1 = optionalUser.get();
-                Playlist playlist1 = user1.getPlaylist(id);
-                if(playlist1 != null){
-                    playlistRepo.delete(playlist1);
-                    return "Playlist id:" + id + " has been removed";
-                }else{
-                    throw new PlaylistException("Playlist does not exist");
-                }
             }else{
                 throw new UserException("User does not exist");
             }
         }else{
             throw new CurrentUserException("User is not logged in");
         }
+    }
 
+
+    @Transactional
+    public String deletePlaylist(String uuId,String name) throws PlaylistException, UserException,CurrentUserException {
+        Optional<CurrentUserSession> currentUserSessionOptional = sessionRepo.findByUuId(uuId);
+        if (currentUserSessionOptional.isPresent()) {
+            CurrentUserSession currentUserSession = currentUserSessionOptional.get();
+            Optional<User> optionalUser = userRepo.findById(currentUserSession.getUserId());
+            if (optionalUser.isPresent()) {
+                User user1 = optionalUser.get();
+                List<Playlist> playlist1 = user1.getPlaylists();
+                for (Playlist playlist : playlist1) {
+                    if(playlist.getName().equals(name)){
+                        playlistRepo.delete(playlist);
+                        playlistRepo.save(playlist);
+                        user1.getPlaylists().remove(playlist);
+                        userRepo.save(user1);
+                        return "Playlist name:" + name + "has been deleted";
+                    }
+                }
+
+            }else{
+                throw new UserException("User does not exist");
+            }
+        }else{
+            throw new CurrentUserException("User is not logged in");
+        }
+        return "";
     }
 
     @Transactional
-    public Playlist createPlaylist(String uuId, String name) throws UserException, CurrentUserException {
+    public String createPlaylist(String uuId, String name) throws UserException, CurrentUserException {
         Optional<CurrentUserSession> currentUserSession = sessionRepo.findByUuId(uuId);
         if (currentUserSession.isPresent()) {
             CurrentUserSession userSession = currentUserSession.get();
             Optional<User> optionalUser = userRepo.findById(userSession.getUserId());
             if (optionalUser.isPresent()) {
                 User user1 = optionalUser.get();
-                Playlist playlist1 = new Playlist((int)this.playlistRepo.count() ,name,new ArrayList<>());
+                Playlist playlist1 = new Playlist();
+                playlist1.setName(name);
+                playlist1.setId((int)playlistRepo.count()+1);
+                playlist1.setSongs(new ArrayList<>());
                 user1.addPlaylist(playlist1);
-
+                playlistRepo.save(playlist1);
                 userRepo.save(user1);
-                return playlist1;
+                return playlist1.toString();
             }else{
                 throw new UserException("User is not present");
             }
@@ -155,17 +165,19 @@ public class PlaylistImpl implements PlaylistService {
     }
 
     @Transactional
-    public Playlist renamePlaylist(String uuId,Integer id, String name) throws UserException, CurrentUserException {
+    public Playlist renamePlaylist(String uuId,Integer playlist_id, String playlist_name) throws UserException, CurrentUserException {
         Optional<CurrentUserSession> currentUserSessionOptional = sessionRepo.findByUuId(uuId);
         if (currentUserSessionOptional.isPresent()) {
             CurrentUserSession currentUserSession = currentUserSessionOptional.get();
             Optional<User> optionalUser = userRepo.findById(currentUserSession.getUserId());
             if (optionalUser.isPresent()) {
                 User user1 = optionalUser.get();
-                user1.getPlaylist().get(id).setPlaylist_name(name);
+                Playlist playlist1 = playlistRepo.findById(playlist_id).get();
+                playlist1.setName(playlist_name);
+                user1.getPlaylist(playlist_id).setName(playlist_name);
+                playlistRepo.save(playlist1);
                 userRepo.save(user1);
-
-                return user1.getPlaylist(id);
+                return user1.getPlaylist(playlist_id);
                 //return user1.getPlaylist().get(Integer.parseInt(id)).toString() + " has been renamed ";
             }else{
                 throw new UserException("User is not present");
@@ -177,16 +189,20 @@ public class PlaylistImpl implements PlaylistService {
     }
 
     @Transactional
-    public String clearPlaylist(String uuId, Integer id) throws UserException, CurrentUserException {
+    public String clearPlaylist(String uuId, Integer playlist_id) throws UserException, CurrentUserException {
         Optional<CurrentUserSession> currentUserSessionOptional = sessionRepo.findByUuId(uuId);
         if (currentUserSessionOptional.isPresent()) {
             CurrentUserSession currentUserSession = currentUserSessionOptional.get();
             Optional<User> optionalUser = userRepo.findById(currentUserSession.getUserId());
             if (optionalUser.isPresent()) {
                 User user1 = optionalUser.get();
-                user1.getPlaylist().get(id).removeAllSongs();
+                Playlist playlist1 = user1.getPlaylist(playlist_id);
+                user1.getPlaylist(playlist_id).removeAllSongs();
+                playlist1.getSongs().clear();
+                playlistRepo.delete(playlist1);
+                playlistRepo.save(playlist1);
                 userRepo.save(user1);
-                return "Playlist: " + id + " has been cleared";
+                return "Playlist id: " + playlist_id + " has been cleared";
             } else {
                 throw new UserException("User is not present");
             }
@@ -195,8 +211,8 @@ public class PlaylistImpl implements PlaylistService {
             throw new CurrentUserException("User is not logged in");
         }
     }
-
-    public Playlist getPlaylist(String uuId, Integer id) throws UserException,CurrentUserException {
+    @Override
+    public Playlist getPlaylist(String uuId, Integer playlist_id) throws UserException,CurrentUserException {
         Optional<CurrentUserSession> currentUserSessionOptional = sessionRepo.findByUuId(uuId);
 
         if (currentUserSessionOptional.isPresent()) {
@@ -204,7 +220,7 @@ public class PlaylistImpl implements PlaylistService {
             Optional<User> optionalUser = userRepo.findById(currentUserSession.getUserId());
             if (optionalUser.isPresent()) {
                 User user1 = optionalUser.get();
-                return user1.getPlaylist().get(id);
+                return user1.getPlaylist(playlist_id);
             }else{
                 throw new UserException("User does not exist");
             }
@@ -212,7 +228,7 @@ public class PlaylistImpl implements PlaylistService {
             throw new CurrentUserException("User is not logged in");
         }
     }
-
+    @Override
     public List<Playlist> getAllPlaylists(String uuId) throws UserException, CurrentUserException{
         Optional<CurrentUserSession> currentUserSessionOptional = sessionRepo.findByUuId(uuId);
         if (currentUserSessionOptional.isPresent()) {
@@ -220,7 +236,7 @@ public class PlaylistImpl implements PlaylistService {
             Optional<User> optionalUser = userRepo.findById(currentUserSession.getUserId());
             if (optionalUser.isPresent()) {
                 User user1 = optionalUser.get();
-                return user1.getPlaylist();
+                return user1.getPlaylists();
             }else{
                 throw new UserException("User does not exist");
 

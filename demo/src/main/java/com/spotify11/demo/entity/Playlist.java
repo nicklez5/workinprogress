@@ -1,33 +1,39 @@
 package com.spotify11.demo.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
-@Setter
-@Getter
+@Data
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-@Component
 @Table(name="playlist")
 public class Playlist {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="PLAYLIST_ID")
-    private Integer playlist_id;
-    private String playlist_name;
+    private Integer id;
 
+    @Column(name = "name")
+    private String name;
 
+    public Playlist(String playlist_name, Integer playlist_id) {
+        this.id = playlist_id;
+        this.name = playlist_name;
+    }
+    public Playlist(String playlist_name) {
+        this.name = name;
+    }
 
-    @OneToMany
-    private List<Song> songs;
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = "playlist_songs", referencedColumnName = "id")
+    private List<Song> songs = new ArrayList<>();
+
 
     public void addSongs(Song song) {
         this.songs.add(song);
@@ -39,8 +45,12 @@ public class Playlist {
         this.songs.clear();
 
     }
-    public String toString() {
-        return "Playlist [playlist_id=" + playlist_id + ", playlist_name=" + playlist_name + ", songs=" + songs + "]";
+    public Integer randomId(){
+        Random rand = new Random();
+        int n = rand.nextInt(100000);
+        n += 1;
+        return n;
     }
+
 
 }

@@ -39,13 +39,12 @@ public class SongController {
         this.songService = songService;
     }
 
-    @GetMapping("/info/{uuId}")
-    public ResponseEntity<Song> getSong(@PathVariable("uuId") String uuId, @RequestBody String title) throws UserException, SongException {
+    @GetMapping("/{uuId}/info")
+    public ResponseEntity<String> getSong(@PathVariable("uuId") String uuId, @RequestParam("title") String title) throws UserException, SongException {
         Song xyz = songService.getSong(title,uuId);
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add("info", xyz.toString());
-        httpHeaders.setContentType(MediaType.valueOf("audio/mpeg"));
-        return new ResponseEntity<>(xyz,httpHeaders, HttpStatus.OK);
+        return new ResponseEntity<>(xyz.toString(),httpHeaders, HttpStatus.OK);
     }
     @PostMapping("/upload")
     public UploadFileResponse uploadFile(@RequestParam("file") MultipartFile file) throws UserException, SongException, IOException {
@@ -53,15 +52,12 @@ public class SongController {
         String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath().path("/downloadFile/").path(fileName).toUriString();
         return new UploadFileResponse(fileName, fileDownloadUri,file.getContentType(),file.getSize());
     }
-    @PostMapping("/upload/{uuId}")
-    public ResponseEntity<UploadFileResponse> uploadSong(@PathVariable("uuId") String uuId, @RequestParam("title") String title, @RequestParam("artist") String artist, @RequestParam("file") MultipartFile file) throws Exception {
+    @PostMapping("/{uuId}/upload")
+    public UploadFileResponse uploadSong(@PathVariable("uuId") String uuId, @RequestParam("title") String title, @RequestParam("artist") String artist, @RequestParam("file") MultipartFile file) throws Exception {
         UploadFileResponse xyz = songService.createSong(title,artist,file,uuId);
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.add("info", xyz.toString());
-        return new ResponseEntity<>(xyz,httpHeaders, HttpStatus.OK);
-
+        return xyz;
     }
-    @PostMapping("/uploadMultipleFiles/{uuId}")
+    @PostMapping("/{uuId}/uploadMultipleFiles")
     public List<UploadFileResponse> uploadFileResponses(@RequestParam("files") MultipartFile[] files){
         return Arrays.asList(files)
                 .stream()
@@ -78,26 +74,21 @@ public class SongController {
                 })
                 .collect(Collectors.toList());
     }
-    @PutMapping("/edit/{uuId}/{id}")
-    public ResponseEntity<Song> editSong(@PathVariable("uuId") String uuId,@PathVariable("id") Integer id, @RequestParam("title") String title, @RequestParam("artist") String artist, @RequestParam("file") MultipartFile file, @RequestParam("type") String type) throws UserException, SongException, IOException {
+    @PutMapping("/{uuId}/editSong/{id}")
+    public ResponseEntity<Song> editSong(@PathVariable("uuId") String uuId,@PathVariable("id") Integer id, @RequestParam("title") String title, @RequestParam("artist") String artist, @RequestParam("file") MultipartFile file) throws UserException, SongException, IOException {
         Song xyz = songService.updateSong(title,artist,file,id,uuId);
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.add("info", xyz.toString());
-        httpHeaders.setContentType(MediaType.parseMediaType(type));
-        httpHeaders.setContentLength(file.getSize());
-        return new ResponseEntity<>(xyz,httpHeaders, HttpStatus.OK);
+        return ResponseEntity.ok(xyz);
+
     }
 
-    @DeleteMapping("/delete/{uuId}/{id}")
-    public ResponseEntity<?> delete_song(@PathVariable("uuId") String uuId, @PathVariable("id") Integer id) throws  UserException, SongException {
-        Song xyz = songService.getSong(id, uuId);
-        String deleted_song = xyz.getTitle();
-        songService.deleteSong(xyz,uuId);
+    @DeleteMapping("/{uuId}/deleteSong/{id}")
+    public ResponseEntity<List<Song>> delete_song(@PathVariable("uuId") String uuId, @PathVariable("id") int id) throws  UserException, SongException {
+        List<Song> xyz2 = songService.deleteSong(id,uuId);
         HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.add("info","Song" + deleted_song);
-        return new ResponseEntity<>(xyz,httpHeaders, HttpStatus.OK);
+        httpHeaders.add("info",xyz2.toString());
+        return new ResponseEntity<>(xyz2,httpHeaders, HttpStatus.OK);
     }
-    @GetMapping("/all/{uuId}")
+    @GetMapping("/{uuId}/all")
     public ResponseEntity<List<Song>> getAllSongs(@PathVariable("uuId") String uuId) throws  UserException, SongException {
         List<Song> xyz = songService.getAllSongs(uuId);
         HttpHeaders httpHeaders = new HttpHeaders();
@@ -105,7 +96,7 @@ public class SongController {
         return new ResponseEntity<>(xyz,httpHeaders, HttpStatus.OK);
     }
 
-    @GetMapping("/downloadFile/{uuId}/")
+    @GetMapping("/{uuId}/downloadFile")
     public ResponseEntity<Resource> downloadSong(@PathVariable("uuId") String uuId, @RequestParam("fileName") String fileName, HttpServletRequest request) throws CurrentUserException, UserException, SongException, IOException {
         Resource resource = songService.loadFileAsResource(fileName);
         String contentType = null;

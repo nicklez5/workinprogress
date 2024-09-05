@@ -5,6 +5,7 @@
       <option name="customHeaders">
         <set>
           <option value="info" />
+          <option value="edit" />
         </set>
       </option>
     </inspection_tool>

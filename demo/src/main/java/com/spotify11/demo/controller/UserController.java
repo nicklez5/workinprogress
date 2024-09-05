@@ -54,14 +54,14 @@ public class UserController {
 //        return new ResponseEntity<User>(user1, HttpStatus.CREATED);
 //    }
 //
-    @PutMapping("/update/{uuId}/{id}")
-    public ResponseEntity<String> updateUser(@RequestBody User user, @PathVariable("uuId") String uuId,Integer id) throws CurrentUserException{
+    @PutMapping("/{uuId}/update")
+    public ResponseEntity<String> updateUser(@RequestBody User user, @PathVariable("uuId") String uuId) throws CurrentUserException{
         User user1 = userService.updateUser(user,uuId);
         String xyz = user1.toString();
         return new ResponseEntity<String>(xyz, HttpStatus.OK);
     }
 
-    @DeleteMapping("/delete/{uuId}/{id}")
+    @DeleteMapping("/{uuId}/deleteUser/{id}")
     public ResponseEntity<String> deleteUser(@PathVariable("uuId") String uuId, @PathVariable("id") Integer id) throws CurrentUserException, UserException {
         User user1 = userService.deleteUser(uuId,id);
         String xyz = user1.toString();
@@ -69,7 +69,7 @@ public class UserController {
         return new ResponseEntity<String>(xyz, HttpStatus.OK);
     }
 
-    @GetMapping("/read/{uuId}")
+    @GetMapping("/{uuId}/readUser")
     public ResponseEntity<String> readUser(@PathVariable("uuId") String uuId) throws CurrentUserException{
         User user1 = userService.readUser(uuId);
         String xyz = user1.toString();

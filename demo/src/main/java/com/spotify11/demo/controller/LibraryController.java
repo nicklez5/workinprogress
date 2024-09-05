@@ -18,7 +18,7 @@ import java.util.List;
 @RestController
 @RequestMapping("library")
 public class LibraryController {
-    @Autowired
+
     private final LibraryService libraryService;
     public LibraryController(LibraryService libraryService) {
 

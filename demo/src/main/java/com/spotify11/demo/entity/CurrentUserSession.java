@@ -1,15 +1,22 @@
 package com.spotify11.demo.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.validation.annotation.Validated;
 
+@Setter
+@Getter
 @Entity
 public class CurrentUserSession {
     
     @Id
     private String email;
+    @Column(name = "userId")
     private Integer userId;
+    @Column(name = "uuId")
     private String uuId;
 
     public CurrentUserSession(){
@@ -20,30 +27,6 @@ public class CurrentUserSession {
         super();
         this.email = email;
         this.userId = userId;
-        this.uuId = uuId;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public Integer getUserId() {
-        return this.userId;
-    }
-
-    public void setUserId(Integer userId) {
-        this.userId = userId;
-    }
-
-    public String getUuId() {
-        return uuId;
-    }
-
-    public void setUuId(String uuId) {
         this.uuId = uuId;
     }
 
