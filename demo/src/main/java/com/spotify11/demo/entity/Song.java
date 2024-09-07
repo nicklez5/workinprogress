@@ -24,7 +24,7 @@ public class Song {
     @Column(name = "artist")
     private String artist;
 
-    @Column(name = "fileDownloadUri")
+    @Column(name = "file_download_uri")
     private String fileDownloadUri;
 
     @Column(name = "filename")

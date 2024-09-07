@@ -3,7 +3,7 @@ package com.spotify11.demo.services;
 import com.spotify11.demo.entity.CurrentUserSession;
 import com.spotify11.demo.entity.Library;
 import com.spotify11.demo.entity.Song;
-import com.spotify11.demo.entity.User;
+import com.spotify11.demo.entity.Users;
 import com.spotify11.demo.exception.CurrentUserException;
 import com.spotify11.demo.exception.SongException;
 import com.spotify11.demo.repo.LibraryRepo;
@@ -40,9 +40,9 @@ public class LibraryImpl implements LibraryService {
         //User user1 = sessionRepo.findByUuId(uuId).
         if (currentUserSession.isPresent()) {
             CurrentUserSession userSession = currentUserSession.get();
-            Optional<User> optionalUser = userRepo.findById(userSession.getUserId());
+            Optional<Users> optionalUser = userRepo.findById(userSession.getUserId());
             if (optionalUser.isPresent()) {
-                User user = optionalUser.get();
+                Users user = optionalUser.get();
                 if(song1 != null){
                     user.getLibrary().addSong(song1);
                     userRepo.save(user);
@@ -70,9 +70,9 @@ public class LibraryImpl implements LibraryService {
         Optional<CurrentUserSession> currentUserSession = sessionRepo.findByUuId(uuId);
         if(currentUserSession.isPresent()){
             CurrentUserSession userSession = currentUserSession.get();
-            Optional<User> optionalUser = userRepo.findById(userSession.getUserId());
+            Optional<Users> optionalUser = userRepo.findById(userSession.getUserId());
             if(optionalUser.isPresent()){
-                User user = optionalUser.get();
+                Users user = optionalUser.get();
                 if(user.getLibrary() != null){
                     user.getLibrary().removeSong(song1);
                     userRepo.save(user);
@@ -90,14 +90,14 @@ public class LibraryImpl implements LibraryService {
 
 
 
-    public List<Song> getLibrary(String uuId) throws CurrentUserException {
+    public Library getLibrary(String uuId) throws CurrentUserException {
         Optional<CurrentUserSession> currentUserSession = sessionRepo.findByUuId(uuId);
         if(currentUserSession.isPresent()){
             CurrentUserSession userSession = currentUserSession.get();
-            Optional<User> optionalUser = userRepo.findById(userSession.getUserId());
+            Optional<Users> optionalUser = userRepo.findById(userSession.getUserId());
             if(optionalUser.isPresent()){
-                User user = optionalUser.get();
-                return user.getLibrary().getSongs();
+                Users user = optionalUser.get();
+                return user.getLibrary();
             }else{
                 throw new CurrentUserException("User is not found");
             }
@@ -111,9 +111,9 @@ public class LibraryImpl implements LibraryService {
         Optional<CurrentUserSession> currentUserSession = sessionRepo.findByUuId(uuId);
         if(currentUserSession.isPresent()){
             CurrentUserSession userSession = currentUserSession.get();
-            Optional<User> optionalUser = userRepo.findById(userSession.getUserId());
+            Optional<Users> optionalUser = userRepo.findById(userSession.getUserId());
             if(optionalUser.isPresent()){
-                User user = optionalUser.get();
+                Users user = optionalUser.get();
                 Library library = new Library();
                 user.setLibrary(library);
                 userRepo.save(user);

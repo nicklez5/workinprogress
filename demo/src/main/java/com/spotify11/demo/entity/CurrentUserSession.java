@@ -14,8 +14,10 @@ public class CurrentUserSession {
     
     @Id
     private String email;
+
     @Column(name = "userId")
     private Integer userId;
+
     @Column(name = "uuId")
     private String uuId;
 

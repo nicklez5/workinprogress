@@ -21,46 +21,38 @@ public class LibraryController {
 
     private final LibraryService libraryService;
     public LibraryController(LibraryService libraryService) {
-
         this.libraryService = libraryService;
     }
 
 
 
+
     @PostMapping("/{uuId}/add")
-    public ResponseEntity<Library> addSong(@RequestBody Song song, @PathVariable("uuId") String uuId) throws SongException, CurrentUserException, LibraryException {
-        Library message = libraryService.addSong(song, uuId);
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.add("info", "Added song: " + song.getTitle() + " to library");
-        return new ResponseEntity<>(message, httpHeaders, HttpStatus.CREATED);
+    public Library addSong(@RequestBody Song song, @PathVariable("uuId") String uuId) throws SongException, CurrentUserException, LibraryException {
+          return libraryService.addSong(song, uuId);
+
     }
 
     @DeleteMapping("/{uuId}/delete")
-    public ResponseEntity<Library> deleteSong(@RequestBody Song song, @PathVariable("uuId") String uuId) throws CurrentUserException, LibraryException {
-        Library message = libraryService.deleteSong(uuId, song);
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.add("info", "Deleted song: " + song.getTitle() + " from library");
-        return new ResponseEntity<>(message, httpHeaders, HttpStatus.CREATED);
+    public Library deleteSong(@RequestBody Song song, @PathVariable("uuId") String uuId) throws CurrentUserException, LibraryException {
+        return libraryService.deleteSong(uuId, song);
+
 
     }
 
 
     @GetMapping("/{uuId}/info")
-    public ResponseEntity<String> getLibrary(@PathVariable("uuId") String uuId) throws CurrentUserException, LibraryException {
-        List<Song> xyz = libraryService.getLibrary(uuId);
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.add("info", "Library found");
-        return new ResponseEntity<>(xyz.toString(), httpHeaders, HttpStatus.OK);
+    public Library getLibrary(@PathVariable("uuId") String uuId) throws CurrentUserException, LibraryException {
+        return libraryService.getLibrary(uuId);
+
     }
     @DeleteMapping("/{uuId}/clear")
-    public ResponseEntity<Library> clearLibrary(@PathVariable("uuId") String uuId) throws CurrentUserException, LibraryException {
-        Library xyz = libraryService.clearLibrary(uuId);
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.add("info", "Library cleared");
-        return new ResponseEntity<>(xyz, httpHeaders, HttpStatus.OK);
+    public Library clearLibrary(@PathVariable("uuId") String uuId) throws CurrentUserException, LibraryException {
+        return libraryService.clearLibrary(uuId);
 
 
-}
+
+    }
 
 }
 

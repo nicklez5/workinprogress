@@ -40,60 +40,32 @@ public class SongController {
     }
 
     @GetMapping("/{uuId}/info")
-    public ResponseEntity<String> getSong(@PathVariable("uuId") String uuId, @RequestParam("title") String title) throws UserException, SongException {
-        Song xyz = songService.getSong(title,uuId);
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.add("info", xyz.toString());
-        return new ResponseEntity<>(xyz.toString(),httpHeaders, HttpStatus.OK);
+    public Song getSong(@PathVariable("uuId") String uuId, @RequestParam("title") String title) throws UserException, SongException {
+        return songService.getSong(title,uuId);
     }
-    @PostMapping("/upload")
-    public UploadFileResponse uploadFile(@RequestParam("file") MultipartFile file) throws UserException, SongException, IOException {
-        String fileName = songService.uploadFile(file);
-        String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath().path("/downloadFile/").path(fileName).toUriString();
-        return new UploadFileResponse(fileName, fileDownloadUri,file.getContentType(),file.getSize());
-    }
+
     @PostMapping("/{uuId}/upload")
     public UploadFileResponse uploadSong(@PathVariable("uuId") String uuId, @RequestParam("title") String title, @RequestParam("artist") String artist, @RequestParam("file") MultipartFile file) throws Exception {
-        UploadFileResponse xyz = songService.createSong(title,artist,file,uuId);
-        return xyz;
+        return songService.createSong(title,artist,file,uuId);
+
     }
-    @PostMapping("/{uuId}/uploadMultipleFiles")
-    public List<UploadFileResponse> uploadFileResponses(@RequestParam("files") MultipartFile[] files){
-        return Arrays.asList(files)
-                .stream()
-                .map(file -> {
-                    try {
-                        return uploadFile(file);
-                    } catch (UserException e) {
-                        throw new RuntimeException(e);
-                    } catch (SongException e) {
-                        throw new RuntimeException(e);
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                })
-                .collect(Collectors.toList());
-    }
+
     @PutMapping("/{uuId}/editSong/{id}")
-    public ResponseEntity<Song> editSong(@PathVariable("uuId") String uuId,@PathVariable("id") Integer id, @RequestParam("title") String title, @RequestParam("artist") String artist, @RequestParam("file") MultipartFile file) throws UserException, SongException, IOException {
-        Song xyz = songService.updateSong(title,artist,file,id,uuId);
-        return ResponseEntity.ok(xyz);
+    public Song editSong(@PathVariable("uuId") String uuId,@PathVariable("id") Integer id, @RequestParam("title") String title, @RequestParam("artist") String artist, @RequestParam("file") MultipartFile file) throws UserException, SongException, IOException {
+        return songService.updateSong(title,artist,file,id,uuId);
+
 
     }
 
     @DeleteMapping("/{uuId}/deleteSong/{id}")
-    public ResponseEntity<List<Song>> delete_song(@PathVariable("uuId") String uuId, @PathVariable("id") int id) throws  UserException, SongException {
-        List<Song> xyz2 = songService.deleteSong(id,uuId);
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.add("info",xyz2.toString());
-        return new ResponseEntity<>(xyz2,httpHeaders, HttpStatus.OK);
+    public Song delete_song(@PathVariable("uuId") String uuId, @PathVariable("id") int id) throws  UserException, SongException {
+        return songService.deleteSong(id,uuId);
+
     }
     @GetMapping("/{uuId}/all")
-    public ResponseEntity<List<Song>> getAllSongs(@PathVariable("uuId") String uuId) throws  UserException, SongException {
-        List<Song> xyz = songService.getAllSongs(uuId);
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.add("info", xyz.toString());
-        return new ResponseEntity<>(xyz,httpHeaders, HttpStatus.OK);
+    public List<Song> getAllSongs(@PathVariable("uuId") String uuId) throws  UserException, SongException {
+        return songService.getAllSongs(uuId);
+
     }
 
     @GetMapping("/{uuId}/downloadFile")

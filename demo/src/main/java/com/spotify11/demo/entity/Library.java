@@ -28,7 +28,7 @@ public class Library {
     private List<Song> songs;
 
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL,mappedBy = "library")
-    private User user;
+    private Users user;
 
     public void addSong(Song song) {
         this.songs.add(song);

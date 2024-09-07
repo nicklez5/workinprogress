@@ -2,12 +2,15 @@ package com.spotify11.demo.controller;
 
 import com.spotify11.demo.entity.CurrentUserSession;
 import com.spotify11.demo.entity.Login;
-import com.spotify11.demo.entity.User;
+import com.spotify11.demo.entity.Users;
 import com.spotify11.demo.exception.CurrentUserException;
 import com.spotify11.demo.exception.UserException;
 import com.spotify11.demo.repo.UserRepo;
+
+
 import com.spotify11.demo.services.UserService;
-//import com.spotify11.demo.services.UserServiceImpl;
+import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,74 +20,71 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("user")
+@RequestMapping("")
 public class UserController {
 
-    public UserController(UserRepo userRepo, UserService userService) {
+
+    public UserController(UserRepo userRepo,  UserService service) {
         this.userRepo = userRepo;
-        this.userService = userService;
+        this.service = service;
 
     }
     @Autowired
-    private final UserService userService;
+    private final UserService service;
+
+
     @Autowired
     private final UserRepo userRepo;
 
+    @GetMapping("/")
+    public String greet(HttpServletRequest request){
+        return "Welcome to Jackson " + request.getSession().getId();
+    }
     @Validated
     @PostMapping("/add")
-    public ResponseEntity<String> addUser(@RequestBody User user) throws UserException {
-        User user1 = userService.addUser(user);
+    public Users addUser(@RequestBody Users user) throws UserException {
+        return service.addUser(user);
 
-        String xyz = user1.toString();
-        return new ResponseEntity<String>(xyz, HttpStatus.CREATED);
     }
-//    @PostMapping("/add")
-//    public ResponseEntity<String> addUser() throws UserException {
-//        String user1 = userService.addUser();
-//        return new ResponseEntity<String>(user1, HttpStatus.CREATED);
+
+
 
     @GetMapping("/all")
-    public ResponseEntity<List<User>> getAllUsers() throws UserException {
-        List<User> userList = (List<User>) userRepo.findAll();
-        return new ResponseEntity<>(userList, HttpStatus.OK);
+    public List<Users> getAllUsers() throws UserException {
+        return service.getAllUser();
     }
-//    @PostMapping("/add")
-//    public ResponseEntity<User> addUser(@RequestBody User user) throws UserException {
-//        User user1 = userService.addUser(user);
-//        return new ResponseEntity<User>(user1, HttpStatus.CREATED);
-//    }
-//
+
     @PutMapping("/{uuId}/update")
-    public ResponseEntity<String> updateUser(@RequestBody User user, @PathVariable("uuId") String uuId) throws CurrentUserException{
-        User user1 = userService.updateUser(user,uuId);
-        String xyz = user1.toString();
-        return new ResponseEntity<String>(xyz, HttpStatus.OK);
+    public Users updateUser(@RequestBody Users user, @PathVariable("uuId") String uuId) throws CurrentUserException{
+        return service.updateUser(user,uuId);
+
     }
 
     @DeleteMapping("/{uuId}/deleteUser/{id}")
-    public ResponseEntity<String> deleteUser(@PathVariable("uuId") String uuId, @PathVariable("id") Integer id) throws CurrentUserException, UserException {
-        User user1 = userService.deleteUser(uuId,id);
-        String xyz = user1.toString();
-        xyz += "has been deleted";
-        return new ResponseEntity<String>(xyz, HttpStatus.OK);
+    public Users deleteUser(@PathVariable("uuId") String uuId, @PathVariable("id") Integer id) throws CurrentUserException, UserException {
+         return service.deleteUser(uuId,id);
+
     }
 
     @GetMapping("/{uuId}/readUser")
-    public ResponseEntity<String> readUser(@PathVariable("uuId") String uuId) throws CurrentUserException{
-        User user1 = userService.readUser(uuId);
-        String xyz = user1.toString();
-        return new ResponseEntity<String>(xyz, HttpStatus.OK);
-    }
+    public Users readUser(@PathVariable("uuId") String uuId) throws CurrentUserException{
+        return service.readUser(uuId);
 
-    @PostMapping("/login")
-    public ResponseEntity<CurrentUserSession> logIn(@RequestBody Login logIn) throws CurrentUserException{
-        CurrentUserSession session = userService.logIn(logIn);
-        return new ResponseEntity<>(session, HttpStatus.OK);
     }
+    @PostMapping("/login")
+    public String logIn(@RequestBody Users user) throws CurrentUserException{
+        return service.verify(user);
+
+    }
+//    @PostMapping("/login")
+//    public CurrentUserSession logIn(@RequestBody Login logIn) throws CurrentUserException{
+//        return service.logIn(logIn);
+//
+//    }
     @DeleteMapping("/logout/{uuId}")
-    public ResponseEntity<String> logOut(@PathVariable("uuId") String uuId) throws CurrentUserException{
-        String message = userService.logOut(uuId);
-        return new ResponseEntity<>(message, HttpStatus.OK);
+    public String logOut(@PathVariable("uuId") String uuId) throws CurrentUserException{
+        return service.logOut(uuId);
+
     }
     
 

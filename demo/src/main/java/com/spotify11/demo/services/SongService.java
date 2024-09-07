@@ -20,12 +20,9 @@ public interface SongService {
 
 
     UploadFileResponse createSong(String title, String artist, MultipartFile file, String uuId) throws CurrentUserException, UserException, IOException, SongException;
-    String uploadFile(MultipartFile file) throws IOException;
-    //Song readSong(String title, String uuId) throws UserException;
     Song updateSong(String title, String artist, MultipartFile file, Integer song_id, String uuId) throws UserException, SongException, IOException, FileStorageException;
-    //String getSongName(String uuId, String docType) throws CurrentUserException;
     Resource loadFileAsResource(String fileName) throws FileNotFoundException;
-    List<Song> deleteSong(int song_id, String uuId) throws UserException, SongException;
+    Song deleteSong(int song_id, String uuId) throws UserException, SongException;
     Song getSong(int id, String uuId) throws  UserException,SongException;
     Song getSong(String title, String uuId) throws  UserException,SongException;
     List<Song> getAllSongs(String uuId) throws UserException, SongException;

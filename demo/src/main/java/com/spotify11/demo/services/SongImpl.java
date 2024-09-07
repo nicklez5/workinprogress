@@ -2,7 +2,7 @@ package com.spotify11.demo.services;
 
 import com.spotify11.demo.entity.CurrentUserSession;
 import com.spotify11.demo.entity.Song;
-import com.spotify11.demo.entity.User;
+import com.spotify11.demo.entity.Users;
 import com.spotify11.demo.exception.CurrentUserException;
 import com.spotify11.demo.exception.FileStorageException;
 import com.spotify11.demo.exception.SongException;
@@ -67,7 +67,7 @@ public class SongImpl implements SongService {
         }
     }
 
-    @Override
+
     public String uploadFile(MultipartFile file) throws IOException {
         String fileName = StringUtils.cleanPath(file.getOriginalFilename());
         try{
@@ -87,10 +87,10 @@ public class SongImpl implements SongService {
         Optional<CurrentUserSession> optionalSession = this.sessionRepo.findByUuId(uuId);
         if (optionalSession.isPresent()) {
             CurrentUserSession currentUserSession = optionalSession.get();
-            Optional<User> optionalUser = userRepo.findByEmail(currentUserSession.getEmail());
+            Optional<Users> optionalUser = userRepo.findByEmail(currentUserSession.getEmail());
 
             if (optionalUser.isPresent()) {
-                User user = optionalUser.get();
+                Users user = optionalUser.get();
                 if (file != null) {
                     String fileName = StringUtils.cleanPath(file.getOriginalFilename());
                     try {
@@ -110,6 +110,7 @@ public class SongImpl implements SongService {
                         //songRepo.save(song123);
                         userRepo.save(user);
                         return xyz3;
+
 
 
                     } catch (IOException e) {
@@ -134,9 +135,9 @@ public class SongImpl implements SongService {
         Optional<CurrentUserSession> optionalSession = sessionRepo.findByUuId(uuId);
         if (optionalSession.isPresent()) {
             CurrentUserSession currentUserSession = optionalSession.get();
-            Optional<User> optionalUser = userRepo.findById(currentUserSession.getUserId());
+            Optional<Users> optionalUser = userRepo.findById(currentUserSession.getUserId());
             if (optionalUser.isPresent()) {
-                User user = optionalUser.get();
+                Users user = optionalUser.get();
                 List<Song> xyz = user.getLibrary().getSongs();
                 song_id = song_id - 1;
                 Song song = xyz.get(song_id);
@@ -195,22 +196,20 @@ public class SongImpl implements SongService {
 
 
     @Transactional
-    public List<Song> deleteSong(int song_id, String uuId) throws  UserException, SongException {
+    public Song deleteSong(int song_id, String uuId) throws  UserException, SongException {
         Optional<CurrentUserSession> optionalSession = sessionRepo.findByUuId(uuId);
         if (optionalSession.isPresent()) {
             CurrentUserSession currentUserSession = optionalSession.get();
-            Optional<User> optionalUser = userRepo.findById(currentUserSession.getUserId());
+            Optional<Users> optionalUser = userRepo.findById(currentUserSession.getUserId());
             if (optionalUser.isPresent()) {
-                User user = optionalUser.get();
+                Users user = optionalUser.get();
                 List<Song> songs = user.getLibrary().getSongs();
                 Song song1 = user.getLibrary().getSongs().get(song_id);
                 if(songs.contains(song1)){
                     user.getLibrary().getSongs().remove(song_id);
                     userRepo.save(user);
-                    //songRepo.delete(song1);
+                    return song1;
 
-
-                    return user.getLibrary().getSongs();
                 }else{
                     throw new SongException("Song not found");
                 }
@@ -229,9 +228,9 @@ public class SongImpl implements SongService {
         Optional<CurrentUserSession> optionalSession = sessionRepo.findByUuId(uuId);
         if (optionalSession.isPresent()) {
             CurrentUserSession currentUserSession = optionalSession.get();
-            Optional<User> optionalUser = userRepo.findById(currentUserSession.getUserId());
+            Optional<Users> optionalUser = userRepo.findById(currentUserSession.getUserId());
             if (optionalUser.isPresent()) {
-                User user = optionalUser.get();
+                Users user = optionalUser.get();
                 if (user.getLibrary().getSongs().get(id) != null) {
                     return user.getLibrary().getSongs().get(id);
                 } else {
@@ -251,9 +250,9 @@ public class SongImpl implements SongService {
         Optional<CurrentUserSession> optionalSession = sessionRepo.findByUuId(uuId);
         if (optionalSession.isPresent()) {
             CurrentUserSession currentUserSession = optionalSession.get();
-            Optional<User> optionalUser = userRepo.findById(currentUserSession.getUserId());
+            Optional<Users> optionalUser = userRepo.findById(currentUserSession.getUserId());
             if (optionalUser.isPresent()) {
-                User user = optionalUser.get();
+                Users user = optionalUser.get();
                 if (user.getLibrary().getSongs() != null) {
                     List<Song> xyz2 = user.getLibrary().getSongs();
                     for (Song song : xyz2) {
@@ -283,9 +282,9 @@ public class SongImpl implements SongService {
         Optional<CurrentUserSession> optionalSession = sessionRepo.findByUuId(uuId);
         if (optionalSession.isPresent()) {
             CurrentUserSession currentUserSession = optionalSession.get();
-            Optional<User> optionalUser = userRepo.findById(currentUserSession.getUserId());
+            Optional<Users> optionalUser = userRepo.findById(currentUserSession.getUserId());
             if (optionalUser.isPresent()) {
-                User user = optionalUser.get();
+                Users user = optionalUser.get();
                 if (user.getLibrary().getSongs() != null) {
                     return user.getLibrary().getSongs();
                 }else{

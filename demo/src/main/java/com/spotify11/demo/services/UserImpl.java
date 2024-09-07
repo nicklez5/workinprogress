@@ -4,13 +4,17 @@ import com.spotify11.demo.entity.*;
 import com.spotify11.demo.exception.CurrentUserException;
 import com.spotify11.demo.exception.PlaylistException;
 import com.spotify11.demo.exception.UserException;
-import com.spotify11.demo.repo.LibraryRepo;
 import com.spotify11.demo.repo.PlaylistRepo;
 import com.spotify11.demo.repo.SessionRepo;
 import com.spotify11.demo.repo.UserRepo;
-
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -19,14 +23,22 @@ import java.util.Optional;
 import java.util.Random;
 
 @Service
-public class UserImpl implements UserService {
+public class UserImpl implements UserService{
+    @Autowired
+    private UserRepo userRepo;
 
-    private final UserRepo userRepo;
+    @Autowired
+    private SessionRepo sessionRepo;
 
+    @Autowired
+    private PlaylistRepo playlistRepo;
 
-    private final SessionRepo sessionRepo;
+    @Autowired
+    AuthenticationManager authManager;
 
-    private final PlaylistRepo playlistRepo;
+    @Autowired
+    JWTService jwtService;
+    private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
     public UserImpl(UserRepo userRepo, SessionRepo sessionRepo, PlaylistRepo playlistRepo) {
         this.userRepo = userRepo;
@@ -34,19 +46,21 @@ public class UserImpl implements UserService {
         this.playlistRepo = playlistRepo;
     }
 
-//    @Override
+    //    @Override
 //    public String addUser(){
 //        return "Fake";
 //    }
     @Transactional
-    public User addUser(User user) throws UserException {
+    public Users addUser(Users user) throws UserException {
         if(user.getRole().equals("ADMIN") || user.getRole().equals("USER")) {
             Library library1 = new Library();
             List<Playlist> playlist1 = new ArrayList<>();
+            user.setPassword(encoder.encode(user.getPassword()));
             user.setLibrary(library1);
             user.setPlaylists(playlist1);
             userRepo.save(user);
             return user;
+
         }
         else{
             throw new UserException("Enter correct role");
@@ -54,17 +68,24 @@ public class UserImpl implements UserService {
 
     }
     @Override
-    public List<User> getAllUser() {
-        return (List<User>) userRepo.findAll();
+    public String verify(Users user) {
+        Authentication authentication = authManager.authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
+        if(authentication.isAuthenticated())
+            return jwtService.generateToken(user.getUsername());
+        return "fail";
+    }
+    @Override
+    public List<Users> getAllUser() {
+        return userRepo.findAll();
     }
 
     @Override
-    public User updateUser(User user, String uuId) throws CurrentUserException {
-        User user1 = this.getUser(uuId);
+    public Users updateUser(Users user, String uuId) throws CurrentUserException {
+        Users user1 = this.getUser(uuId);
         if(user1 != null && user.getRole() != null){
             if(user.getRole().equals("ADMIN") || user.getRole().equals("USER")){
                 if(user1.getId() == user1.getId()){
-                    User user2 = userRepo.save(user);
+                    Users user2 = userRepo.save(user);
                     return user2;
                 }else{
                     throw new CurrentUserException("User Id is not same");
@@ -81,11 +102,11 @@ public class UserImpl implements UserService {
 
     }
 
-    private User getUser(String uuId) {
+    private Users getUser(String uuId) {
         Optional<CurrentUserSession> optionalSession = sessionRepo.findByUuId(uuId);
         if(optionalSession.isPresent()){
             CurrentUserSession currentUserSession = optionalSession.get();
-            Optional<User> optionalUser = userRepo.findById(currentUserSession.getUserId());
+            Optional<Users> optionalUser = userRepo.findById(currentUserSession.getUserId());
             if(optionalUser.isPresent()){
                 return optionalUser.get();
             }
@@ -95,19 +116,19 @@ public class UserImpl implements UserService {
     }
 
     @Override
-    public User readUser(String uuId) throws CurrentUserException {
+    public Users readUser(String uuId) throws CurrentUserException {
         return this.getUser(uuId);
 
     }
     // id is the one we are looking to delete
     // uuID is the parent
     @Override
-    public User deleteUser(String uuId,Integer id) throws CurrentUserException, UserException {
-        User user = this.getUser(uuId);
+    public Users deleteUser(String uuId, Integer id) throws CurrentUserException, UserException {
+        Users user = this.getUser(uuId);
         if (user.getRole().equals("ADMIN")) {
-            Optional<User> optionalUser = userRepo.findById(id);
+            Optional<Users> optionalUser = userRepo.findById(id);
             if (optionalUser.isPresent()) {
-                User user1 = optionalUser.get();
+                Users user1 = optionalUser.get();
                 Optional<CurrentUserSession> optionalSession = sessionRepo.findById(user1.getEmail());
                 if (optionalSession.isPresent()) {
                     this.logOut(optionalSession.get().getUuId());
@@ -126,9 +147,9 @@ public class UserImpl implements UserService {
     @Override
     public CurrentUserSession logIn(Login logIn) throws CurrentUserException {
 
-        Optional<User> optionalUser = userRepo.findByEmail(logIn.getEmail());
+        Optional<Users> optionalUser = userRepo.findByEmail(logIn.getEmail());
         if(optionalUser.isPresent()){
-            User user = optionalUser.get();
+            Users user = optionalUser.get();
             if(user.getPassword().equals(logIn.getPassword())){
                 Optional<CurrentUserSession> optionalSession = sessionRepo.findById(logIn.getEmail());
                 if(optionalSession.isEmpty()){
@@ -164,9 +185,9 @@ public class UserImpl implements UserService {
     }
 
     @Override
-    public User assignPlaylistToUser(String uuId, Integer playlist_id) throws PlaylistException {
+    public Users assignPlaylistToUser(String uuId, Integer playlist_id) throws PlaylistException {
         List<Playlist> playlistSet = null;
-        User user = this.getUser(uuId);
+        Users user = this.getUser(uuId);
         assert user != null;
         if(user.getRole().equals("ADMIN") || user.getRole().equals("USER")){
             Playlist playlist = playlistRepo.findById(playlist_id).orElseThrow(null);
@@ -190,5 +211,7 @@ public class UserImpl implements UserService {
         }
         return str.toString();
     }
+
+
 
 }
