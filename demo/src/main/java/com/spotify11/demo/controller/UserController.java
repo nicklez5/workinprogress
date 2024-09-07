@@ -40,13 +40,16 @@ public class UserController {
     public String greet(HttpServletRequest request){
         return "Welcome to Jackson " + request.getSession().getId();
     }
-    @Validated
+
     @PostMapping("/add")
     public Users addUser(@RequestBody Users user) throws UserException {
         return service.addUser(user);
 
     }
-
+    @GetMapping("/info")
+    public String infoUser(HttpServletRequest request) throws UserException {
+        return request.getSession().getId();
+    }
 
 
     @GetMapping("/all")

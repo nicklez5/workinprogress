@@ -27,8 +27,9 @@ public class Library {
     @JoinColumn( name = "lib_songs", referencedColumnName = "id")
     private List<Song> songs;
 
-    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL,mappedBy = "library")
-    private Users user;
+//    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL,mappedBy = "library")
+//    private Users user;
+
 
     public void addSong(Song song) {
         this.songs.add(song);

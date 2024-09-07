@@ -40,9 +40,8 @@ public class Users {
         this.role = role;
     }
 
-
-    @OneToOne(fetch=FetchType.LAZY, cascade=CascadeType.ALL)
-    @JoinColumn(name="user_library")
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinColumn(name="library_id")
     private Library library;
 
 

@@ -38,6 +38,7 @@ public class UserImpl implements UserService{
 
     @Autowired
     JWTService jwtService;
+
     private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
     public UserImpl(UserRepo userRepo, SessionRepo sessionRepo, PlaylistRepo playlistRepo) {
