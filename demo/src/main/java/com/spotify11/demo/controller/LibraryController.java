@@ -6,7 +6,9 @@ import com.spotify11.demo.entity.Song;
 import com.spotify11.demo.exception.CurrentUserException;
 import com.spotify11.demo.exception.LibraryException;
 import com.spotify11.demo.exception.SongException;
+import com.spotify11.demo.exception.UserException;
 import com.spotify11.demo.services.LibraryService;
+import com.spotify11.demo.services.SongService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -20,37 +22,49 @@ import java.util.List;
 public class LibraryController {
 
     private final LibraryService libraryService;
-    public LibraryController(LibraryService libraryService) {
+    private final SongService songService;
+    public LibraryController(LibraryService libraryService, SongService songService) {
         this.libraryService = libraryService;
+        this.songService = songService;
     }
 
 
 
 
-    @PostMapping("/{uuId}/add")
-    public Library addSong(@RequestBody Song song, @PathVariable("uuId") String uuId) throws SongException, CurrentUserException, LibraryException {
-          return libraryService.addSong(song, uuId);
+    @PostMapping("/addSong/{song_id}")
+    public Library addSong(@PathVariable("song_id") int song_id, @RequestParam("username") String username) throws SongException, UserException {
+        Song song1 = this.songService.getSong(song_id,username);
+        if(song1 != null){
+            return libraryService.addSong(song1, username);
+        }else{
+            throw new SongException("Song Not Found");
+        }
+
 
     }
 
-    @DeleteMapping("/{uuId}/delete")
-    public Library deleteSong(@RequestBody Song song, @PathVariable("uuId") String uuId) throws CurrentUserException, LibraryException {
-        return libraryService.deleteSong(uuId, song);
+    @DeleteMapping("/deleteSong/{song_id}")
+    public Library deleteSong(@PathVariable("song_id") int song_id, @RequestParam("username") String username) throws SongException, UserException {
+        Song song1 = this.songService.getSong(song_id,username);
+        if(song1 != null){
+            return libraryService.deleteSong(song1,username);
+        }else{
+            throw new SongException("Song not Found");
+        }
+
 
 
     }
 
 
-    @GetMapping("/{uuId}/info")
-    public Library getLibrary(@PathVariable("uuId") String uuId) throws CurrentUserException, LibraryException {
-        return libraryService.getLibrary(uuId);
+    @GetMapping("/info")
+    public Library getLibrary(@RequestParam("username") String username) throws  LibraryException {
+        return libraryService.getLibrary(username);
 
     }
-    @DeleteMapping("/{uuId}/clear")
-    public Library clearLibrary(@PathVariable("uuId") String uuId) throws CurrentUserException, LibraryException {
-        return libraryService.clearLibrary(uuId);
-
-
+    @DeleteMapping("/clear")
+    public Library clearLibrary(@RequestParam("username") String username) throws  LibraryException {
+        return libraryService.clearLibrary(username);
 
     }
 

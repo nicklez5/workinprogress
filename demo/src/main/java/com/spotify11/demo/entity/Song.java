@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.apache.commons.lang.builder.ToStringBuilder;
 
 @Setter
 @Getter
@@ -31,8 +32,8 @@ public class Song {
     private String filename;
 
 
-
-    public Song(String title, String artist, String fileDownloadUri, String filename) {
+    public Song(Integer id, String title, String artist, String fileDownloadUri, String filename) {
+        this.id = id;
         this.title = title;
         this.artist = artist;
         this.fileDownloadUri = fileDownloadUri;
@@ -40,10 +41,12 @@ public class Song {
     }
 
 
-
-
+    //    @Override
+//    public String toString(){
+//        return "Song(Song ID: " + this.id + "  " + "Title: " + this.title + "  " +  "Artist: " + this.artist + "  " + "Data: " + this.fileDownloadUri + " " +  "Filename: " + this.filename;
+//    }
     @Override
-    public String toString(){
-        return "Song(Song ID: " + this.id + "  " + "Title: " + this.title + "  " +  "Artist: " + this.artist + "  " + "Data: " + this.fileDownloadUri + " " +  "Filename: " + this.filename;
+    public String toString() {
+        return "ID:" + this.id + " " + "Title:" + this.title + " " + "Artist:" + this.artist + " " + "File download url" + this.fileDownloadUri + " " + "File name: " + this.filename + "\n";
     }
 }

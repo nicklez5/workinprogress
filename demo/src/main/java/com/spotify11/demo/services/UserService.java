@@ -7,16 +7,23 @@ import com.spotify11.demo.exception.UserException;
 import java.util.List;
 
 import com.spotify11.demo.exception.PlaylistException;
+import jakarta.servlet.http.HttpServletRequest;
 
 public interface UserService {
     //public String addUser();
-    Users addUser(Users user) throws UserException;
+    Users register(Users user) throws UserException;
     List<Users> getAllUser();
-    Users updateUser(Users user, String uuId) throws CurrentUserException;
-    Users readUser(String uuId) throws CurrentUserException;
-    Users deleteUser(String uuId, Integer id) throws CurrentUserException, UserException;
-    CurrentUserSession logIn(Login logIn) throws CurrentUserException;
-    String logOut(String uuId) throws CurrentUserException;
-    Users assignPlaylistToUser(String uuId, Integer playlist_id) throws PlaylistException;
+
+
+
+
+    Users updateUser(String username, String password, String role, String email) throws CurrentUserException;
+    Users readUser(String username);
+
+    Users deleteUser(String username, Integer user_id) throws CurrentUserException, UserException;
+
+
     String verify(Users user);
+
+
 }

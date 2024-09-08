@@ -23,7 +23,7 @@ public class Library {
     private int id;
 
 
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
     @JoinColumn( name = "lib_songs", referencedColumnName = "id")
     private List<Song> songs;
 

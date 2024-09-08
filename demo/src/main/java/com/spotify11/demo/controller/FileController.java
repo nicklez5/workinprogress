@@ -1,4 +1,5 @@
 package com.spotify11.demo.controller;
+import com.spotify11.demo.repo.SongRepo;
 import com.spotify11.demo.response.UploadFileResponse;
 import com.spotify11.demo.services.FileStorageService;
 
@@ -25,9 +26,10 @@ public class FileController {
     private static final Logger logger = LoggerFactory.getLogger(FileController.class);
 
     private final FileStorageService fileStorageService;
-
-    public FileController(FileStorageService fileStorageService) {
+    private final SongRepo songrepo;
+    public FileController(FileStorageService fileStorageService, SongRepo songrepo) {
         this.fileStorageService = fileStorageService;
+        this.songrepo = songrepo;
     }
 
     @PostMapping("/uploadFile")
@@ -39,15 +41,14 @@ public class FileController {
                 .path(fileName)
                 .toUriString();
 
-        return new UploadFileResponse(fileName, fileDownloadUri,
+        return new UploadFileResponse((int) songrepo.count(), fileName, fileDownloadUri,
                 file.getContentType(), file.getSize());
     }
 
     @PostMapping("/uploadMultipleFiles")
     public List<UploadFileResponse> uploadMultipleFiles(@RequestParam("files") MultipartFile[] files) {
-        return Arrays.asList(files)
-                .stream()
-                .map(file -> uploadFile(file))
+        return Arrays.stream(files)
+                .map(this::uploadFile)
                 .collect(Collectors.toList());
     }
 

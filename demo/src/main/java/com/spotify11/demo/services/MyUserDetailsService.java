@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class MyUserDetailsService implements UserDetailsService{
+    
     @Autowired
     private UserRepo userRepo;
 
@@ -29,6 +30,7 @@ public class MyUserDetailsService implements UserDetailsService{
 
         return new UserPrincipal(user);
     }
+
 }
 
 

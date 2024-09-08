@@ -39,37 +39,36 @@ public class SongController {
         this.songService = songService;
     }
 
-    @GetMapping("/{uuId}/info")
-    public Song getSong(@PathVariable("uuId") String uuId, @RequestParam("title") String title) throws UserException, SongException {
-        return songService.getSong(title,uuId);
+    @GetMapping("/{id}/info")
+    public Song getSong(@PathVariable("id") int id, @RequestParam("username") String username) throws UserException, SongException {
+        return songService.getSong(id,username);
     }
 
-    @PostMapping("/{uuId}/upload")
-    public UploadFileResponse uploadSong(@PathVariable("uuId") String uuId, @RequestParam("title") String title, @RequestParam("artist") String artist, @RequestParam("file") MultipartFile file) throws Exception {
-        return songService.createSong(title,artist,file,uuId);
-
-    }
-
-    @PutMapping("/{uuId}/editSong/{id}")
-    public Song editSong(@PathVariable("uuId") String uuId,@PathVariable("id") Integer id, @RequestParam("title") String title, @RequestParam("artist") String artist, @RequestParam("file") MultipartFile file) throws UserException, SongException, IOException {
-        return songService.updateSong(title,artist,file,id,uuId);
-
+    @PostMapping("/upload")
+    public UploadFileResponse uploadSong(@RequestParam("username") String username, @RequestParam("title") String title, @RequestParam("artist") String artist, @RequestParam("file") MultipartFile file) throws Exception {
+        return songService.createSong(title,artist,file,username);
 
     }
 
-    @DeleteMapping("/{uuId}/deleteSong/{id}")
-    public Song delete_song(@PathVariable("uuId") String uuId, @PathVariable("id") int id) throws  UserException, SongException {
-        return songService.deleteSong(id,uuId);
-
-    }
-    @GetMapping("/{uuId}/all")
-    public List<Song> getAllSongs(@PathVariable("uuId") String uuId) throws  UserException, SongException {
-        return songService.getAllSongs(uuId);
+    @PutMapping("/editSong/{song_id}")
+    public Song editSong(@PathVariable("song_id") Integer song_id, @RequestParam("title") String title, @RequestParam("artist") String artist, @RequestParam("file") MultipartFile file, @RequestParam("username") String username) throws UserException, SongException, IOException {
+        return songService.updateSong(title,artist,file,song_id,username);
 
     }
 
-    @GetMapping("/{uuId}/downloadFile")
-    public ResponseEntity<Resource> downloadSong(@PathVariable("uuId") String uuId, @RequestParam("fileName") String fileName, HttpServletRequest request) throws CurrentUserException, UserException, SongException, IOException {
+    @DeleteMapping("/deleteSong/{song_id}")
+    public Song delete_song(@PathVariable("song_id") Integer song_id, @RequestParam("username") String username) throws  UserException, SongException {
+        return songService.deleteSong(song_id,username);
+
+    }
+    @GetMapping("/all")
+    public List<Song> getAllSongs(@RequestParam("username") String username) throws  UserException, SongException {
+        return songService.getAllSongs(username);
+
+    }
+
+    @GetMapping("/downloadFile")
+    public ResponseEntity<Resource> downloadSong(@RequestParam("fileName") String fileName, HttpServletRequest request) throws CurrentUserException, UserException, SongException, IOException {
         Resource resource = songService.loadFileAsResource(fileName);
         String contentType = null;
         try{
@@ -86,6 +85,7 @@ public class SongController {
                 .body(resource);
 
     }
+
 
 
 

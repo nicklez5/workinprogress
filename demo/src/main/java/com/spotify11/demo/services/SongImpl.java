@@ -9,16 +9,13 @@ import com.spotify11.demo.exception.SongException;
 
 import com.spotify11.demo.exception.UserException;
 import com.spotify11.demo.property.FileStorageProperties;
-import com.spotify11.demo.repo.SessionRepo;
 import com.spotify11.demo.repo.SongRepo;
 import com.spotify11.demo.repo.UserRepo;
 import com.spotify11.demo.response.UploadFileResponse;
-import jakarta.persistence.Id;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
@@ -43,9 +40,6 @@ public class SongImpl implements SongService {
     private static final Logger log = LoggerFactory.getLogger(SongImpl.class);
 
 
-    private final SessionRepo sessionRepo;
-
-
     private final UserRepo userRepo;
 
 
@@ -55,8 +49,7 @@ public class SongImpl implements SongService {
 
 
 
-    public SongImpl(SessionRepo sessionRepo, UserRepo userRepo, SongRepo songRepo, FileStorageProperties fileStorageProperties) {
-        this.sessionRepo = sessionRepo;
+    public SongImpl(UserRepo userRepo, SongRepo songRepo, FileStorageProperties fileStorageProperties) {
         this.userRepo = userRepo;
         this.songRepo = songRepo;
         this.fileStorageLocation = Paths.get(fileStorageProperties.getUploadDir()).toAbsolutePath().normalize();
@@ -66,6 +59,7 @@ public class SongImpl implements SongService {
             throw new FileStorageException("Could not create the directory where the uploaded files will be stored.", e);
         }
     }
+
 
 
     public String uploadFile(MultipartFile file) throws IOException {
@@ -83,15 +77,10 @@ public class SongImpl implements SongService {
         }
     }
     @Transactional
-    public UploadFileResponse createSong(String title, String artist, MultipartFile file, String uuId) throws CurrentUserException,  SongException {
-        Optional<CurrentUserSession> optionalSession = this.sessionRepo.findByUuId(uuId);
-        if (optionalSession.isPresent()) {
-            CurrentUserSession currentUserSession = optionalSession.get();
-            Optional<Users> optionalUser = userRepo.findByEmail(currentUserSession.getEmail());
-
-            if (optionalUser.isPresent()) {
-                Users user = optionalUser.get();
-                if (file != null) {
+    public UploadFileResponse createSong(String title, String artist, MultipartFile file, String username) throws Exception {
+            Users user = userRepo.findByUsername(username);
+            if(user != null){
+                if(file != null){
                     String fileName = StringUtils.cleanPath(file.getOriginalFilename());
                     try {
                         if (fileName.contains("..")) {
@@ -103,48 +92,41 @@ public class SongImpl implements SongService {
                                 .path("/downloadFile/")
                                 .path(fileName)
                                 .toUriString();
-                        UploadFileResponse xyz3 = new UploadFileResponse(fileName, fileDownloadUri,file.getContentType(),file.getSize());
+                        UploadFileResponse xyz3 = new UploadFileResponse((int) songRepo.count()+1, fileName, fileDownloadUri, file.getContentType(), file.getSize());
+                        int songCount = (int)songRepo.count();
 
-                        Song song123 = new Song(title,artist,fileDownloadUri,fileName);
+                        Song song123 = new Song(songCount+1,title, artist, fileDownloadUri, fileName);
+
                         user.getLibrary().addSong(song123);
-                        //songRepo.save(song123);
+                        songRepo.saveAndFlush(song123);
+
                         userRepo.save(user);
                         return xyz3;
-
-
-
-                    } catch (IOException e) {
-                        throw new FileStorageException("Could not store file " + fileName + ". Please try again!", e);
+                    }catch(IOException ex){
+                        throw new FileStorageException("Could not store file " + fileName + ".Please try again!", ex);
                     }
-                } else {
-                    throw new SongException("Song is null");
+                }else {
+                    throw new FileNotFoundException("File not found.");
                 }
-            } else {
-                throw new CurrentUserException("cant find User:" + uuId);
+            }else {
+                throw new Exception("cannot find username: " + username);
             }
 
-        }else{
-            throw new CurrentUserException("No one is logged in");
-        }
 
     }
 
 
     @Transactional
-    public Song updateSong(String title, String artist, MultipartFile file, Integer song_id, String uuId) throws UserException, SongException, FileStorageException, IOException {
-        Optional<CurrentUserSession> optionalSession = sessionRepo.findByUuId(uuId);
-        if (optionalSession.isPresent()) {
-            CurrentUserSession currentUserSession = optionalSession.get();
-            Optional<Users> optionalUser = userRepo.findById(currentUserSession.getUserId());
-            if (optionalUser.isPresent()) {
-                Users user = optionalUser.get();
+    public Song updateSong(String title, String artist, MultipartFile file, Integer song_id, String username) throws UserException, SongException, FileStorageException, IOException {
+            Users user = userRepo.findByUsername(username);
+            if(user != null){
                 List<Song> xyz = user.getLibrary().getSongs();
                 song_id = song_id - 1;
                 Song song = xyz.get(song_id);
-                if (song != null && xyz.contains(song)) {
+                if(song != null && xyz.contains(song)){
                     user.getLibrary().getSongs().get(song_id).setTitle(title);
                     user.getLibrary().getSongs().get(song_id).setArtist(artist);
-                    if (file != null) {
+                    if(file != null){
                         String fileName = StringUtils.cleanPath(file.getOriginalFilename());
                         try{
                             if (fileName.contains("..")) {
@@ -165,19 +147,17 @@ public class SongImpl implements SongService {
                         }catch(IOException e){
                             throw new FileStorageException("Could not store file " + fileName + ". Please try again!", e);
                         }
-
-                    } else {
-                        throw new IOException("File is null");
+                    }else {
+                        throw new FileNotFoundException("File not found.");
                     }
-                } else {
-                    throw new SongException("Song not found");
+                }else {
+                        throw new SongException("Song not found in library or is null");
                 }
-            } else {
-                throw new UserException("User is not logged in");
+
+            }else {
+                throw new UserException("Username: " + username + " not found");
             }
-        }else{
-            return null;
-        }
+
     }
     @Override
     public Resource loadFileAsResource(String fileName) throws FileNotFoundException {
@@ -196,105 +176,70 @@ public class SongImpl implements SongService {
 
 
     @Transactional
-    public Song deleteSong(int song_id, String uuId) throws  UserException, SongException {
-        Optional<CurrentUserSession> optionalSession = sessionRepo.findByUuId(uuId);
-        if (optionalSession.isPresent()) {
-            CurrentUserSession currentUserSession = optionalSession.get();
-            Optional<Users> optionalUser = userRepo.findById(currentUserSession.getUserId());
-            if (optionalUser.isPresent()) {
-                Users user = optionalUser.get();
-                List<Song> songs = user.getLibrary().getSongs();
-                Song song1 = user.getLibrary().getSongs().get(song_id);
-                if(songs.contains(song1)){
+    public Song deleteSong(int song_id, String username) throws  UserException, SongException {
+            Users user = userRepo.findByUsername(username);
+            if(user != null){
+                List<Song> xyz = user.getLibrary().getSongs();
+                song_id = song_id - 1;
+                Song song = xyz.get(song_id);
+                if(xyz.contains(song)){
                     user.getLibrary().getSongs().remove(song_id);
                     userRepo.save(user);
-                    return song1;
-
+                    return song;
                 }else{
-                    throw new SongException("Song not found");
-                }
-            } else {
-                throw new UserException("User not found");
-            }
-        } else {
-            throw new UserException("User is not present");
-        }
-
-    }
-
-
-    @Override
-    public Song getSong(int id, String uuId) throws UserException, SongException {
-        Optional<CurrentUserSession> optionalSession = sessionRepo.findByUuId(uuId);
-        if (optionalSession.isPresent()) {
-            CurrentUserSession currentUserSession = optionalSession.get();
-            Optional<Users> optionalUser = userRepo.findById(currentUserSession.getUserId());
-            if (optionalUser.isPresent()) {
-                Users user = optionalUser.get();
-                if (user.getLibrary().getSongs().get(id) != null) {
-                    return user.getLibrary().getSongs().get(id);
-                } else {
-                    throw new SongException("Song not found");
-                }
-            } else {
-                throw new UserException("User not found");
-            }
-
-        } else {
-            throw new UserException("User is not present");
-        }
-    }
-
-    @Override
-    public Song getSong(String title, String uuId) throws UserException, SongException {
-        Optional<CurrentUserSession> optionalSession = sessionRepo.findByUuId(uuId);
-        if (optionalSession.isPresent()) {
-            CurrentUserSession currentUserSession = optionalSession.get();
-            Optional<Users> optionalUser = userRepo.findById(currentUserSession.getUserId());
-            if (optionalUser.isPresent()) {
-                Users user = optionalUser.get();
-                if (user.getLibrary().getSongs() != null) {
-                    List<Song> xyz2 = user.getLibrary().getSongs();
-                    for (Song song : xyz2) {
-                        if (song.getTitle().equals(title)) {
-                            return song;
-                        }
-                    }
-                } else {
-                    throw new SongException("Library is empty");
-                }
-
-            } else {
-                throw new UserException("User is not present");
-            }
-
-        } else {
-            throw new UserException("User is not logged in");
-
-
-        }
-        return null;
-    }
-
-
-    @Override
-    public List<Song> getAllSongs(String uuId) throws UserException, SongException {
-        Optional<CurrentUserSession> optionalSession = sessionRepo.findByUuId(uuId);
-        if (optionalSession.isPresent()) {
-            CurrentUserSession currentUserSession = optionalSession.get();
-            Optional<Users> optionalUser = userRepo.findById(currentUserSession.getUserId());
-            if (optionalUser.isPresent()) {
-                Users user = optionalUser.get();
-                if (user.getLibrary().getSongs() != null) {
-                    return user.getLibrary().getSongs();
-                }else{
-                    throw new SongException("Song not found");
+                    throw new SongException("Song not found in library or is null");
                 }
             }else{
-                throw new UserException("User not found");
+                throw new UserException("Username: " + username + " not found");
+            }
+
+    }
+
+
+    @Override
+    public Song getSong(int song_id, String username) throws UserException, SongException {
+        Users user = userRepo.findByUsername(username);
+        if(user != null){
+            List<Song> xyz = user.getLibrary().getSongs();
+            Song song = xyz.get(xyz.size()-1);
+            if(song != null){
+                return song;
+            }else {
+                throw new SongException("Song not found in library or is null");
+            }
+        }else {
+            throw new UserException("Username: " + username + " not found");
+        }
+
+    }
+
+    @Override
+    public Song getSong(String title, String username) throws UserException, SongException {
+        Users user = userRepo.findByUsername(username);
+        if(user != null){
+            List<Song> xyz = user.getLibrary().getSongs();
+            Song song = xyz.get(xyz.size() - 1);
+            if(song != null){
+                return song;
+            }else{
+                throw new SongException("Song not found in library or is null");
             }
         }else{
-            throw new UserException("User is not logged in");
+            throw new UserException("Username: " + username + " not found");
+        }
+
+
+    }
+
+
+    @Override
+    public List<Song> getAllSongs(String username) throws UserException, SongException {
+        Users user = userRepo.findByUsername(username);
+        if(user != null){
+            List<Song> xyz = user.getLibrary().getSongs();
+            return xyz;
+        }else {
+            throw new UserException("Username: " + username + " not found");
         }
     }
 }

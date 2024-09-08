@@ -1,33 +1,40 @@
 package com.spotify11.demo.controller;
 
-import com.spotify11.demo.entity.CurrentUserSession;
-import com.spotify11.demo.entity.Login;
-import com.spotify11.demo.entity.Users;
+import com.spotify11.demo.entity.*;
 import com.spotify11.demo.exception.CurrentUserException;
 import com.spotify11.demo.exception.UserException;
+import com.spotify11.demo.repo.PlaylistRepo;
+import com.spotify11.demo.repo.SongRepo;
 import com.spotify11.demo.repo.UserRepo;
+
 
 
 import com.spotify11.demo.services.UserService;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
+
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("")
 public class UserController {
 
 
-    public UserController(UserRepo userRepo,  UserService service) {
+    @Autowired
+    private PlaylistRepo playlistRepo;
+    @Autowired
+    private SongRepo songRepo;
+    public UserController(UserRepo userRepo, UserService service, SongRepo songRepo) {
+
         this.userRepo = userRepo;
         this.service = service;
-
+        this.songRepo = songRepo;
     }
     @Autowired
     private final UserService service;
@@ -41,14 +48,14 @@ public class UserController {
         return "Welcome to Jackson " + request.getSession().getId();
     }
 
-    @PostMapping("/add")
-    public Users addUser(@RequestBody Users user) throws UserException {
-        return service.addUser(user);
+    @PostMapping("/register")
+    public Users register(@RequestBody Users user) throws UserException {
+        return service.register(user);
 
     }
     @GetMapping("/info")
-    public String infoUser(HttpServletRequest request) throws UserException {
-        return request.getSession().getId();
+    public Users infoUser(@RequestParam("username") String username) throws UserException {
+        return service.readUser(username);
     }
 
 
@@ -57,21 +64,21 @@ public class UserController {
         return service.getAllUser();
     }
 
-    @PutMapping("/{uuId}/update")
-    public Users updateUser(@RequestBody Users user, @PathVariable("uuId") String uuId) throws CurrentUserException{
-        return service.updateUser(user,uuId);
+    @PutMapping("/update/{user_id}")
+    public Users updateUser(@PathVariable("user_id") String user_id,@RequestBody Users user) throws CurrentUserException{
+        return service.updateUser(user.getUsername(),user.getPassword(),user.getRole(),user.getEmail());
 
     }
 
-    @DeleteMapping("/{uuId}/deleteUser/{id}")
-    public Users deleteUser(@PathVariable("uuId") String uuId, @PathVariable("id") Integer id) throws CurrentUserException, UserException {
-         return service.deleteUser(uuId,id);
+    @DeleteMapping("/deleteUser/{user_id}")
+    public Users deleteUser(@RequestParam("username") String username, @PathVariable("user_id") Integer user_id) throws CurrentUserException, UserException {
+         return service.deleteUser(username,user_id);
 
     }
 
-    @GetMapping("/{uuId}/readUser")
-    public Users readUser(@PathVariable("uuId") String uuId) throws CurrentUserException{
-        return service.readUser(uuId);
+    @GetMapping("/readUser")
+    public Users readUser(@RequestParam("username") String username) throws CurrentUserException{
+        return service.readUser(username);
 
     }
     @PostMapping("/login")
@@ -79,16 +86,54 @@ public class UserController {
         return service.verify(user);
 
     }
+    @PostMapping("/createPlaylist")
+    public String createPlaylist(@RequestBody Playlist entity) throws CurrentUserException{
+        Playlist playlist = new Playlist(entity.getName(),entity.getId());
+        playlist = playlistRepo.save(playlist);
+        return "Playlist name: " + playlist.getName() + " created";
+    }
+//    @PostMapping("/createPlaylist_with_songs")
+//    public String createPlaylistWithSongs(@RequestBody Playlist entity) throws CurrentUserException{
+//        Playlist playlist = new Playlist(entity.getName(),entity.getId());
+//        Set<Song> songs = new HashSet<>();
+//        Song song1 = this.songRepo.getReferenceById(12);
+//        Song song2 = this.songRepo.getReferenceById(11);
+//        Song song3 = this.songRepo.getReferenceById(10);
+//        songs.add(song1);
+//        songs.add(song2);
+//        songs.add(song3);
+//
+//        playlist.setSongs(songs);
+//        playlistRepo.save(playlist);
+//        return "Playlist name: " + playlist.getName() + " created";
+
+    @GetMapping("/getPlaylist/{playlist_id")
+    public String getPlaylist(@PathVariable("playlist_id") Integer playlist_id) throws CurrentUserException{
+        Playlist playlist = this.playlistRepo.getById(playlist_id);
+        System.out.println("Playlist details: " + playlist.toString() + "\n");
+        System.out.println("Song details: " + playlist.getSongs().toString() + "\n");
+        return "Playlist name: " + playlist.getName() + " created";
+    }
 //    @PostMapping("/login")
 //    public CurrentUserSession logIn(@RequestBody Login logIn) throws CurrentUserException{
 //        return service.logIn(logIn);
 //
 //    }
-    @DeleteMapping("/logout/{uuId}")
-    public String logOut(@PathVariable("uuId") String uuId) throws CurrentUserException{
-        return service.logOut(uuId);
+//    @PostMapping("/logout")
+//    public ResponseEntity<String> logout(HttpServletRequest request){
+//         String token = extractTokenFromRequest(request);
+//         blacklist.addToBlacklist(token);
+//         return ResponseEntity.ok("Logged out successfully");
+//
+//    }
+//    public String extractTokenFromRequest(HttpServletRequest request){
+//        String authorizationHeader = request.getHeader("Authorization");
+//        if(StringUtils.hasText(authorizationHeader) && authorizationHeader.startsWith("Bearer ")){
+//            return authorizationHeader.substring(7);
+//        }
+//        return null;
+//    }
 
-    }
     
 
 }

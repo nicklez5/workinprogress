@@ -6,9 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 @Data
 @Entity
@@ -19,7 +17,8 @@ public class Users {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    @Column(name = "id")
+    private Integer user_id;
 
     @Column(name = "username")
     private String username;
@@ -33,6 +32,16 @@ public class Users {
     @Column(name = "role")
     private String role;
 
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinColumn(name="library_id")
+    private Library library;
+
+
+    @ManyToMany(fetch = FetchType.EAGER, cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH })
+    @JoinTable(name = "PLAYLIST_SONG_MAPPING", joinColumns = @JoinColumn(name = "song_id"),
+            inverseJoinColumns = @JoinColumn(name = "playlist_id"))
+    private Set<Playlist> Playlists = new HashSet<>();
+
     public Users(String username, String email, String password,String role) {
         this.username = username;
         this.email = email;
@@ -40,14 +49,7 @@ public class Users {
         this.role = role;
     }
 
-    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinColumn(name="library_id")
-    private Library library;
 
-
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinColumn(name = "user_playlists", referencedColumnName = "id")
-    private List<Playlist> Playlists;
 
 
     public Integer randomId(){
@@ -57,13 +59,13 @@ public class Users {
         return n;
     }
 
-    public Playlist getPlaylist(Integer id) {
+    public Playlist getPlaylist(Integer playlist_id) {
         for(Playlist p : Playlists){
-            if(p.getId().equals(id)){
+            if(p.getId().equals(playlist_id)){
                 return p;
             }
         }
-        return this.Playlists.get(id);
+        return (Playlist) this.Playlists;
     }
 
     public void addPlaylist(Playlist playlist) {
@@ -72,9 +74,7 @@ public class Users {
     public void removePlaylist(Playlist playlist){
         this.Playlists.remove(playlist);
     }
-    public void setPlaylist(Playlist playlist){
-        this.Playlists.set(playlist.getId(), playlist);
-    }
+
 
 
 }

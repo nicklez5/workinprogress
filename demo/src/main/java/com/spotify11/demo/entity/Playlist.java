@@ -1,12 +1,11 @@
 package com.spotify11.demo.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 @Data
 @Entity
@@ -25,14 +24,16 @@ public class Playlist {
     public Playlist(String playlist_name, Integer playlist_id) {
         this.id = playlist_id;
         this.name = playlist_name;
+
     }
     public Playlist(String playlist_name) {
         this.name = name;
     }
 
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinColumn(name = "playlist_songs", referencedColumnName = "id")
-    private List<Song> songs = new ArrayList<>();
+    @ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH })
+    @JoinTable(name = "PLAYLIST_SONG_MAPPING", joinColumns = @JoinColumn(name = "playlist_id"),
+            inverseJoinColumns = @JoinColumn(name = "song_id"))
+    private Set<Song> songs = new HashSet<>();
 
 
     public void addSongs(Song song) {
