@@ -64,9 +64,9 @@ public class UserController {
         return service.getAllUser();
     }
 
-    @PutMapping("/update/{user_id}")
-    public Users updateUser(@PathVariable("user_id") String user_id,@RequestBody Users user) throws CurrentUserException{
-        return service.updateUser(user.getUsername(),user.getPassword(),user.getRole(),user.getEmail());
+    @PutMapping("/update/")
+    public Users updateUser(@RequestParam("username") String username,@RequestParam("password") String user_password, @RequestParam("role") String user_role, @RequestParam("email") String user_email) throws CurrentUserException{
+        return service.updateUser(username,user_password,user_role,user_email);
 
     }
 
