@@ -38,12 +38,15 @@ public class JWTService {
     public String generateToken(String username) {
         long year = TimeUnit.MILLISECONDS.convert(365, TimeUnit.DAYS);
         Map<String, Object> claims = new HashMap<>();
+        Date stopTime = new Date();
+        stopTime.setHours(stopTime.getHours() + 2);
+
         return Jwts.builder()
                 .claims()
                 .add(claims)
                 .subject(username)
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + 86400000))
+                .expiration(stopTime)
                 .and()
                 .signWith(getKey())
                 .compact();
