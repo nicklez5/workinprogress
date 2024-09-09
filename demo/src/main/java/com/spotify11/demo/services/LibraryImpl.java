@@ -1,20 +1,16 @@
 package com.spotify11.demo.services;
 
-import com.spotify11.demo.entity.CurrentUserSession;
 import com.spotify11.demo.entity.Library;
 import com.spotify11.demo.entity.Song;
 import com.spotify11.demo.entity.Users;
-import com.spotify11.demo.exception.CurrentUserException;
+
 import com.spotify11.demo.exception.LibraryException;
 import com.spotify11.demo.exception.SongException;
 import com.spotify11.demo.repo.LibraryRepo;
 import com.spotify11.demo.repo.UserRepo;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
-import org.apache.catalina.User;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
 @Service
 public class LibraryImpl implements LibraryService {
 
@@ -25,7 +21,7 @@ public class LibraryImpl implements LibraryService {
 
 
     
-    public LibraryImpl(UserRepo userRepo, LibraryRepo libraryRepo) throws CurrentUserException {
+    public LibraryImpl(UserRepo userRepo, LibraryRepo libraryRepo)  {
         this.userRepo = userRepo;
         this.libraryRepo = libraryRepo;
     }
@@ -33,6 +29,7 @@ public class LibraryImpl implements LibraryService {
 
     @Transactional
     public Library addSong(Song song1,String username) throws SongException{
+
         Users user = userRepo.findByUsername(username);
         if (song1 != null) {
             user.getLibrary().addSong(song1);
@@ -62,11 +59,6 @@ public class LibraryImpl implements LibraryService {
         Users user = userRepo.findByUsername(username);
         if(user.getLibrary() == null){
             throw new LibraryException("Library is null");
-//            Library library = new Library();
-//            user.setLibrary(library);
-//            libraryRepo.save(library);
-//            userRepo.save(user);
-//            return library;
         }else{
             return user.getLibrary();
         }
@@ -80,7 +72,6 @@ public class LibraryImpl implements LibraryService {
             }else {
                 Library library = new Library();
                 user.setLibrary(library);
-                libraryRepo.save(library);
                 userRepo.save(user);
                 return library;
             }

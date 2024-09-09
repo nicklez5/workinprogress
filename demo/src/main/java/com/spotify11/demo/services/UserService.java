@@ -1,7 +1,7 @@
 package com.spotify11.demo.services;
 
 import com.spotify11.demo.entity.*;
-import com.spotify11.demo.exception.CurrentUserException;
+
 import com.spotify11.demo.exception.UserException;
 
 import java.util.List;
@@ -17,10 +17,9 @@ public interface UserService {
 
 
 
-    Users updateUser(String username, String password, String role, String email) throws CurrentUserException;
-    Users readUser(String username);
-
-    Users deleteUser(String username, Integer user_id) throws CurrentUserException, UserException;
+    Users updateUser(String username, String password, String role, String email) throws UserException;
+    Users readUser(String username) throws UserException;
+    Users deleteUser(String username, Integer user_id) throws UserException;
 
 
     String verify(Users user);

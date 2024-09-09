@@ -11,7 +11,6 @@ import java.util.*;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name="playlist")
 public class Playlist {
 
     @Id
@@ -26,32 +25,9 @@ public class Playlist {
         this.name = playlist_name;
 
     }
-    public Playlist(String playlist_name) {
-        this.name = name;
-    }
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH })
-    @JoinTable(name = "PLAYLIST_SONG_MAPPING", joinColumns = @JoinColumn(name = "playlist_id"),
-            inverseJoinColumns = @JoinColumn(name = "song_id"))
-    private Set<Song> songs = new HashSet<>();
-
-
-    public void addSongs(Song song) {
-        this.songs.add(song);
-    }
-    public void deleteSongs(Song song) {
-        this.songs.remove(song);
-    }
-    public void removeAllSongs(){
-        this.songs.clear();
-
-    }
-    public Integer randomId(){
-        Random rand = new Random();
-        int n = rand.nextInt(100000);
-        n += 1;
-        return n;
-    }
+    @OneToMany(cascade=CascadeType.ALL , fetch = FetchType.EAGER)
+    private Set<Song> songs;
 
 
 }

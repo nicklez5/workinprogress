@@ -1,10 +1,9 @@
 package com.spotify11.demo.services;
 
 import com.spotify11.demo.entity.*;
-import com.spotify11.demo.exception.CurrentUserException;
+
 
 import com.spotify11.demo.exception.UserException;
-
 import com.spotify11.demo.repo.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -30,23 +29,23 @@ public class UserImpl implements UserService{
     @Autowired
     private UserRepo userRepo;
 
-    private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(12);
+    private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(12);
 
 
 
     
-    public Users register(Users user) throws UserException {
+    public Users register(Users user) {
             Library library1 = new Library();
-            Set<Playlist> playlist1 = new HashSet<>();
+            Playlist playlist1 = new Playlist();
             user.setPassword(encoder.encode(user.getPassword()));
             user.setLibrary(library1);
-            user.setPlaylists(playlist1);
+            user.setPlaylist(playlist1);
             userRepo.save(user);
             return user;
 
 
     }
-    
+
     public String verify(Users user) {
         Authentication authentication = authManager.authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
         if(authentication.isAuthenticated())
@@ -62,42 +61,56 @@ public class UserImpl implements UserService{
     }
 
     @Override
-    public Users updateUser(String username, String password, String role, String email) throws CurrentUserException {
+    public Users updateUser(String username, String password, String role, String email) throws UserException {
         Users user1 = userRepo.findByUsername(username);
-        user1.setPassword(encoder.encode(password));
-        user1.setRole(role);
-        user1.setEmail(email);
-        return userRepo.save(user1);
+        if(user1 != null){
+            user1.setPassword(encoder.encode(password));
+            user1.setRole(role);
+            user1.setEmail(email);
+            userRepo.save(user1);
+            return user1;
+        }else{
+            throw new UserException("User with username: " + username + " could not be found");
+        }
+
 
     }
 
-    private Users getUser(String username) {
-        return userRepo.findByUsername(username);
+    private Users getUser(String username) throws UserException {
+        Users user1 = userRepo.findByUsername(username);
+        if(user1 != null){
+            return user1;
+        }else{
+            throw new UserException("User with username: " + username + " not found");
+        }
 
     }
 
 
     @Override
-    public Users readUser(String username)  {
+    public Users readUser(String username) throws UserException {
         return this.getUser(username);
 
     }
     // id is the one we are looking to delete
     // uuID is the parent
     @Override
-    public Users deleteUser(String username, Integer user_id)  {
+    public Users deleteUser(String username, Integer user_id) throws UserException {
         Users user = userRepo.findByUsername(username);
         Users admin = null;
         if(userRepo.findById(user_id).isPresent()){
             admin = userRepo.findById(user_id).get();
+            if(admin.getRole().equals("ADMIN")) {
+                userRepo.delete(user);
+                return user;
+            }else{
+                throw new UserException("User is not admin");
+            }
+        }else{
+            throw new UserException("User with Id: " + String.valueOf(user_id) + " not found");
         }
 
-        assert admin != null;
-        if(admin.getRole().equals("ADMIN")) {
-            userRepo.delete(user);
-            return user;
-        }
-        return null;
+
 
     }
 

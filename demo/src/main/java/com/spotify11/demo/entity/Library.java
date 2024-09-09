@@ -15,7 +15,6 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name="library")
 public class Library {
 
     @Id
@@ -23,12 +22,10 @@ public class Library {
     private int id;
 
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
-    @JoinColumn( name = "lib_songs", referencedColumnName = "id")
+    @OneToMany(cascade=CascadeType.ALL , fetch = FetchType.EAGER)
     private List<Song> songs;
 
-//    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL,mappedBy = "library")
-//    private Users user;
+
 
 
     public void addSong(Song song) {

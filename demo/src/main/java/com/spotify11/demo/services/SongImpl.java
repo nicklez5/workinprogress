@@ -1,9 +1,7 @@
 package com.spotify11.demo.services;
 
-import com.spotify11.demo.entity.CurrentUserSession;
 import com.spotify11.demo.entity.Song;
 import com.spotify11.demo.entity.Users;
-import com.spotify11.demo.exception.CurrentUserException;
 import com.spotify11.demo.exception.FileStorageException;
 import com.spotify11.demo.exception.SongException;
 
@@ -31,7 +29,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
-import java.util.Optional;
 
 
 @Service
@@ -93,9 +90,9 @@ public class SongImpl implements SongService {
                                 .path(fileName)
                                 .toUriString();
                         UploadFileResponse xyz3 = new UploadFileResponse((int) songRepo.count()+1, fileName, fileDownloadUri, file.getContentType(), file.getSize());
-                        int songCount = (int)songRepo.count();
 
-                        Song song123 = new Song(songCount+1,title, artist, fileDownloadUri, fileName);
+
+                        Song song123 = new Song(title, artist, fileDownloadUri, fileName);
 
                         user.getLibrary().addSong(song123);
                         songRepo.saveAndFlush(song123);
@@ -201,16 +198,15 @@ public class SongImpl implements SongService {
         Users user = userRepo.findByUsername(username);
         if(user != null){
             List<Song> xyz = user.getLibrary().getSongs();
-            Song song = xyz.get(xyz.size()-1);
-            if(song != null){
-                return song;
-            }else {
-                throw new SongException("Song not found in library or is null");
+            for(Song song : xyz){
+                if (song.getId() == song_id){
+                    return song;
+                }
             }
         }else {
             throw new UserException("Username: " + username + " not found");
         }
-
+        return null;
     }
 
     @Override
@@ -218,17 +214,16 @@ public class SongImpl implements SongService {
         Users user = userRepo.findByUsername(username);
         if(user != null){
             List<Song> xyz = user.getLibrary().getSongs();
-            Song song = xyz.get(xyz.size() - 1);
-            if(song != null){
-                return song;
-            }else{
-                throw new SongException("Song not found in library or is null");
+            for (Song song : xyz) {
+                if (song.getTitle().equals(title)) {
+                    return song;
+                }
             }
         }else{
             throw new UserException("Username: " + username + " not found");
         }
 
-
+        return null;
     }
 
 

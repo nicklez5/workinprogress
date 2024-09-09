@@ -1,7 +1,7 @@
 package com.spotify11.demo.services;
 
 import com.spotify11.demo.entity.Song;
-import com.spotify11.demo.exception.CurrentUserException;
+
 import com.spotify11.demo.exception.FileStorageException;
 import com.spotify11.demo.exception.SongException;
 
