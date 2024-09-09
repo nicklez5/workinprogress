@@ -1,13 +1,12 @@
 package com.spotify11.demo.entity;
 
-import com.spotify11.demo.exception.SongException;
+
 import jakarta.persistence.*;
 import lombok.*;
 
-import com.spotify11.demo.entity.Song;
-import org.springframework.validation.annotation.Validated;
 
-import java.util.ArrayList;
+
+
 import java.util.List;
 
 @Getter

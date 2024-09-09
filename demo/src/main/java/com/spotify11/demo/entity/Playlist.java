@@ -1,9 +1,9 @@
 package com.spotify11.demo.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.stereotype.Component;
+
 
 import java.util.*;
 
@@ -20,8 +20,8 @@ public class Playlist {
     @Column(name = "name")
     private String name;
 
-    public Playlist(String playlist_name, Integer playlist_id) {
-        this.id = playlist_id;
+    public Playlist(String playlist_name) {
+
         this.name = playlist_name;
 
     }
