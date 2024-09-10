@@ -27,14 +27,14 @@ public class LibraryController {
 
 
     @Transactional
-    @PostMapping("/addSong/{title}")
+    @PostMapping("/addSong")
     public Library addSong(@RequestParam("title") String title, @RequestParam("username") String username) throws SongException, UserException {
         return libraryService.addSong(this.songService.getSong(title,username), username);
 
 
     }
     @Transactional
-    @DeleteMapping("/deleteSong/{title}")
+    @DeleteMapping("/deleteSong")
     public Library deleteSong(@RequestParam("title") String title, @RequestParam("username") String username) throws SongException, UserException {
         return libraryService.deleteSong(this.songService.getSong(title,username), username);
 

@@ -96,6 +96,8 @@ public class PlaylistImpl implements PlaylistService {
             if(user != null) {
                 Playlist playlist1 = user.getPlaylist();
                 if(playlist1 != null) {
+                    playlist1.getSongs().clear();
+                    playlistRepo.save(playlist1);
                     playlist1 = new Playlist();
                     user.setPlaylist(playlist1);
                     userRepo.save(user);
@@ -150,6 +152,7 @@ public class PlaylistImpl implements PlaylistService {
                 if(playlist1 != null) {
                     playlist1.getSongs().clear();
                     playlistRepo.save(playlist1);
+
                     return "Your playlist has been cleared";
                 }
             }else{

@@ -24,7 +24,7 @@ public class Song {
     @Column(name = "artist")
     private String artist;
 
-    @Column(name = "file_download_uri")
+    @Column(name = "fileDownloadUri")
     private String fileDownloadUri;
 
     @Column(name = "filename")
@@ -37,4 +37,8 @@ public class Song {
         this.filename = filename;
     }
 
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this);
+    }
 }

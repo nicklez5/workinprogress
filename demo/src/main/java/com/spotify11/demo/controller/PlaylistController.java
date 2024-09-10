@@ -33,20 +33,20 @@ public class PlaylistController {
 
     // ADD SONG
     @Transactional
-    @PostMapping("/addSongToPlaylist/{username_id}")
-    public Playlist addSongForPlaylist(@RequestBody Song entity, @PathVariable(name = "username_id") String username_id) throws Exception {
+    @PostMapping("/addSongToPlaylist/{username}")
+    public Playlist addSongForPlaylist(@RequestBody Song entity, @PathVariable(name = "username") String username) throws Exception {
         try{
-            return playlistService.addSong(entity.getId(), username_id);
+            return playlistService.addSong(entity.getId(), username);
         } catch (Exception e) {
             throw new Exception("Song name: " + entity.getTitle() + "could not be found");
         }
 
     }
     @Transactional
-    @DeleteMapping("/removeSongFromPlaylist/{username_id}")
-    public Playlist removeSongFromPlaylist(@RequestBody Song entity, @PathVariable(name = "username_id") String username_id) throws Exception {
+    @DeleteMapping("/removeSongFromPlaylist/{username}")
+    public Playlist removeSongFromPlaylist(@RequestBody Song entity, @PathVariable(name = "username") String username) throws Exception {
         try{
-            return playlistService.removeSong(entity.getId(), username_id );
+            return playlistService.removeSong(entity.getId(), username );
         } catch (Exception e) {
             throw new Exception("Song name: " + entity.getTitle() + "could not be found");
         }

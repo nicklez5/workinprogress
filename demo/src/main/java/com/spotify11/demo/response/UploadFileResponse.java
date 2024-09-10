@@ -10,7 +10,7 @@ import lombok.Data;
 public class UploadFileResponse {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer song_id;
+    private Integer id;
     private String fileName;
     private String fileDownloadUri;
     private String fileType;
@@ -19,7 +19,7 @@ public class UploadFileResponse {
 
     public UploadFileResponse(Integer song_id2, String fileName, String fileDownloadUri, String fileType, long size) {
         this.fileName = fileName;
-        this.song_id = song_id2;
+        this.id = song_id2;
         this.fileDownloadUri = fileDownloadUri;
         this.fileType = fileType;
         this.size = size;

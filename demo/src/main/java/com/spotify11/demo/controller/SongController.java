@@ -69,8 +69,8 @@ public class SongController {
     }
     @Transactional
     @GetMapping("/downloadFile")
-    public ResponseEntity<Resource> downloadSong(@RequestParam("fileName") String fileName, HttpServletRequest request) throws IOException {
-        Resource resource = songService.loadFileAsResource(fileName);
+    public ResponseEntity<Resource> downloadSong(@RequestParam("filename") String filename, HttpServletRequest request) throws IOException {
+        Resource resource = songService.loadFileAsResource(filename);
         String contentType = null;
         try{
             contentType = request.getServletContext().getMimeType(resource.getFile().getAbsolutePath());

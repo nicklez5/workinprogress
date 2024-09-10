@@ -14,14 +14,13 @@ import java.util.*;
 public class Playlist {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
 
     @Column(name = "name")
     private String name;
 
     public Playlist(String playlist_name) {
-
         this.name = playlist_name;
 
     }
