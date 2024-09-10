@@ -12,7 +12,7 @@ import com.spotify11.demo.services.SongService;
 import jakarta.transaction.Transactional;
 import org.springframework.web.bind.annotation.*;
 
-
+@CrossOrigin(origins = "http://localhost:8080")
 @RestController
 @RequestMapping("library")
 public class LibraryController {

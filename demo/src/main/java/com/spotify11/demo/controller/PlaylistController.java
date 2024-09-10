@@ -13,23 +13,16 @@ import jakarta.transaction.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 
-
+@CrossOrigin(origins = "http://localhost:8080")
 @RestController
 @RequestMapping("playlist")
 public class PlaylistController {
 
-
     private final PlaylistService playlistService;
-
-
-
 
     public PlaylistController(PlaylistService playlistService) {
         this.playlistService = playlistService;
-
-
     }
-
 
     // ADD SONG
     @Transactional

@@ -25,7 +25,7 @@ import java.io.IOException;
 
 import java.util.List;
 
-
+@CrossOrigin(origins = "http://localhost:8080")
 @RestController
 @RequestMapping("song")
 public class SongController {
@@ -38,6 +38,7 @@ public class SongController {
     public SongController(SongService songService) {
         this.songService = songService;
     }
+
     @Transactional
     @GetMapping("/{id}/info")
     public Song getSong(@PathVariable("id") int id, @RequestParam("username") String username) throws UserException, SongException {
