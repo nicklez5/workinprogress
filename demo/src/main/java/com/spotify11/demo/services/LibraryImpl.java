@@ -36,15 +36,19 @@ public class LibraryImpl implements LibraryService {
         User user1 = userRepo.findByEmail(email).get();
         if (user1 != null) {
             if (song1 != null) {
-                user1.getLibrary().addSong(song1);
-                userRepo.save(user1);
-                return user1.getLibrary();
+                if(user1.getLibrary() != null){
+                    user1.getLibrary().addSong(song1);
+                    userRepo.save(user1);
+                    return user1.getLibrary();
+                }
+
             }else{
                 throw new SongException("File corrupted");
             }
         } else {
             throw new UserException("User not found");
         }
+        return null;
     }
 
     @Transactional
@@ -52,9 +56,14 @@ public class LibraryImpl implements LibraryService {
         User user1 = userRepo.findByEmail(email).get();
         if (user1 != null) {
             if (song1 != null) {
-                user1.getLibrary().removeSong(song1);
-                userRepo.save(user1);
-                return user1.getLibrary();
+                if(user1.getLibrary() != null){
+                    user1.getLibrary().removeSong(song1);
+                    userRepo.save(user1);
+                    return user1.getLibrary();
+                }else{
+                    throw new SongException("Library corrupted");
+                }
+
             }else{
                 throw new SongException("song does not exist");
             }

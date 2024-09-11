@@ -34,17 +34,16 @@ public class User implements UserDetails {
     private Integer id;
 
     @Setter
-    @Column(nullable = false)
+    @Getter
     private String fullName;
 
 
     @Setter
-    @Column(unique = true, length = 100, nullable = false)
+    @Getter
     private String email;
 
     @Setter
     @Getter
-    @Column(nullable = false)
     private String password;
 
     @CreationTimestamp

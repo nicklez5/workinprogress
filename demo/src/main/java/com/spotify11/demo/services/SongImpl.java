@@ -58,24 +58,9 @@ public class SongImpl implements SongService {
         }
     }
 
-
-
-    public String uploadFile(MultipartFile file) throws IOException {
-        String fileName = StringUtils.cleanPath(file.getOriginalFilename());
-        try{
-            if(fileName.contains("..")){
-                throw new FileStorageException("Sorry! Filename contains invalid path sequence.");
-            }
-            Path targetLocation = this.fileStorageLocation.resolve(fileName);
-            Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
-
-            return fileName;
-        }catch(IOException ex){
-            throw new FileStorageException("Could not store file " + fileName + ".Please try again!", ex);
-        }
-    }
     @Transactional
-    public UploadFileResponse createSong(String title, String artist, MultipartFile file, String email) throws Exception {
+    @Override
+    public UploadFileResponse createSong(String title, String artist, MultipartFile file, String email) throws Exception, FileNotFoundException, FileStorageException {
             User user = userRepo.findByEmail(email).get();
             if(user != null){
                 if(file != null){
@@ -157,7 +142,6 @@ public class SongImpl implements SongService {
             }
 
     }
-    @Override
     public Resource loadFileAsResource(String fileName) throws FileNotFoundException {
         try{
             Path filePath = this.fileStorageLocation.resolve(fileName).normalize();
@@ -194,31 +178,40 @@ public class SongImpl implements SongService {
     }
 
 
-    @Override
     public Song getSong(int song_id, String email) throws UserException, SongException {
         User user = userRepo.findByEmail(email).get();
         if(user != null){
+            boolean song_found = false;
             List<Song> xyz = user.getLibrary().getSongs();
             for(Song song : xyz){
                 if (song.getId() == song_id){
+                    song_found = true;
                     return song;
                 }
             }
+            if(song_found == false){
+                throw new SongException("Song id:" + song_id + " has not been found");
+            }
+            
         }else {
             throw new UserException("User with email: " + email + " not found");
         }
         return null;
     }
 
-    @Override
     public Song getSong(String title, String email) throws UserException, SongException {
         User user = userRepo.findByEmail(email).get();
         if(user != null){
+            boolean song_found = false;
             List<Song> xyz = user.getLibrary().getSongs();
             for (Song song : xyz) {
                 if (song.getTitle().equals(title)) {
+                    song_found = true;
                     return song;
                 }
+            }
+            if(song_found == false){
+                throw new SongException("Song title: " + title + " could not be found");
             }
         }else{
             throw new UserException("User with email: " + email + " not found");
@@ -228,7 +221,6 @@ public class SongImpl implements SongService {
     }
 
 
-    @Override
     public List<Song> getAllSongs(String email) throws UserException, SongException {
         User user = userRepo.findByEmail(email).get();
         if(user != null){

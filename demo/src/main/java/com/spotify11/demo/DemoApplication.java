@@ -2,6 +2,9 @@ package com.spotify11.demo;
 
 
 
+import com.spotify11.demo.configuration.ApplicationConfiguration;
+import com.spotify11.demo.configuration.JwtAuthenticationFilter;
+import com.spotify11.demo.configuration.SecurityConfiguration;
 import com.spotify11.demo.property.FileStorageProperties;
 import org.springframework.boot.SpringApplication;
 
@@ -24,7 +27,15 @@ public class DemoApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(DemoApplication.class, args);
 	}
-
+	@Bean
+	public WebMvcConfigurer corsConfigurer() {
+		return new WebMvcConfigurer() {
+			@Override
+			public void addCorsMappings(CorsRegistry registry) {
+				registry.addMapping("/**").allowedOrigins("*");
+			}
+		};
+	}
 
 
 }

@@ -12,10 +12,9 @@ import com.spotify11.demo.repo.SongRepo;
 
 import com.spotify11.demo.repo.UserRepository;
 import jakarta.transaction.Transactional;
-import org.springframework.http.ResponseEntity;
+
 import org.springframework.stereotype.Service;
 
-import static org.springframework.http.ResponseEntity.ok;
 
 @Service
 public class PlaylistImpl implements PlaylistService {
@@ -25,6 +24,7 @@ public class PlaylistImpl implements PlaylistService {
     private final UserRepository userRepo;
     private final PlaylistRepo playlistRepo;
     private final SongRepo songRepo;
+
     public PlaylistImpl(UserRepository userRepo, PlaylistRepo playlistRepo, SongRepo songRepo) {
         this.userRepo = userRepo;
         this.playlistRepo = playlistRepo;
@@ -36,7 +36,7 @@ public class PlaylistImpl implements PlaylistService {
             User user = userRepo.findByEmail(email).get();
             if(user != null) {
                 Playlist playlist1 = user.getPlaylist();
-                if(playlist1 != null) {
+                if(playlist1 != null){
                     Song song1 = songRepo.findById(song_id).orElse(null);
                     if(song1 != null) {
                         playlist1.getSongs().add(song1);
@@ -46,8 +46,10 @@ public class PlaylistImpl implements PlaylistService {
                         throw new SongException("Song does not exist");
                     }
                 }else{
-                    throw new PlaylistException("Playlist could not be found");
+                    throw new PlaylistException("Playlist is null");
                 }
+
+            
             }else{
                 throw new UserException("User with email: " + email + " not found");
             }
@@ -56,11 +58,11 @@ public class PlaylistImpl implements PlaylistService {
     }
 
     @Transactional
-    public Playlist removeSong(Integer song_id, String email) throws SongException, UserException,PlaylistException {
+    public Playlist removeSong(Integer song_id, String email) throws SongException, UserException, PlaylistException {
         User user = userRepo.findByEmail(email).get();
         if (user != null) {
             Playlist playlist1 = user.getPlaylist();
-            if (playlist1 != null) {
+            if(playlist1 != null){
                 Song song1 = songRepo.findById(song_id).orElse(null);
                 if (song1 != null) {
                     playlist1.getSongs().remove(song1);
@@ -69,23 +71,23 @@ public class PlaylistImpl implements PlaylistService {
                 } else {
                     throw new SongException("Song does not exist");
                 }
-            } else {
-                throw new PlaylistException("Playlist could not be found");
+            }else{
+                throw new PlaylistException("Playlist does not exist");
             }
 
         }else{
             throw new UserException(STR."User with email: \{email} not found");
         }
     }
-    @Override
-    public Playlist readPlaylist(String email) throws UserException, PlaylistException {
+
+    public Playlist readPlaylist(String email) throws UserException {
             User user = userRepo.findByEmail(email).get();
             if(user != null) {
                 Playlist playlist1 = user.getPlaylist();
-                if(playlist1 != null) {
+                if(playlist1 != null){
                     return playlist1;
-                }else {
-                    throw new PlaylistException("Playlist could not be found");
+                }else{
+                    throw new UserException("Playlist does not exist");
                 }
             }else{
                 throw new UserException(STR."User with email: \{email} not found");
@@ -95,20 +97,22 @@ public class PlaylistImpl implements PlaylistService {
 
 
     @Transactional
-    public Playlist deletePlaylist(String email) throws PlaylistException, UserException {
+    public Playlist deletePlaylist(String email) throws UserException {
             User user = userRepo.findByEmail(email).get();
             if(user != null) {
                 Playlist playlist1 = user.getPlaylist();
-                if(playlist1 != null) {
+                if(playlist1 != null){
                     playlist1.getSongs().clear();
-                    playlistRepo.save(playlist1);
                     playlist1 = new Playlist();
+                    playlistRepo.save(playlist1);
                     user.setPlaylist(playlist1);
                     userRepo.save(user);
                     return playlist1;
                 }else{
-                    throw new PlaylistException("User with email: " + email + "Playlist is null");
+                    throw new UserException("Playlist does not exist");
                 }
+
+
             }else{
                 throw new UserException("User: " + email + " not found");
             }
@@ -137,9 +141,15 @@ public class PlaylistImpl implements PlaylistService {
     public String renamePlaylist(String email, String playlist_name) throws UserException {
             User user = userRepo.findByEmail(email).get();
             if(user != null) {
-                user.getPlaylist().setName(playlist_name);
-                userRepo.save(user);
-                return "Your playlist has been renamed";
+                if(user.getPlaylist() != null){
+                    user.getPlaylist().setName(playlist_name);
+                    userRepo.save(user);
+                    return "Your playlist has been renamed";
+                }else{
+                    throw new UserException("Playlist does not exist");
+                }
+
+
             }else{
                 throw new UserException(STR."User with email:\{email} not found");
             }
@@ -149,40 +159,47 @@ public class PlaylistImpl implements PlaylistService {
     }
 
     @Transactional
-    public String clearPlaylist(String email) throws UserException, PlaylistException {
+    public String clearPlaylist(String email) throws UserException {
             User user = userRepo.findByEmail(email).get();
             if(user != null) {
                 Playlist playlist1 = user.getPlaylist();
-                if(playlist1 != null) {
+                if(playlist1 != null){
                     playlist1.getSongs().clear();
                     playlistRepo.save(playlist1);
-
                     return "Your playlist has been cleared";
+                }else{
+                    throw new UserException("Playlist does not exist");
                 }
             }else{
                 throw new UserException(STR."User with email: \{email} not found");
             }
 
-        return null;
-
     }
     @Override
-    public String getPlaylist(String email) throws UserException, PlaylistException {
+    public String getPlaylist(String email) throws UserException{
         User user1 = userRepo.findByEmail(email).get();
         if(user1 != null){
-            return user1.getPlaylist().toString();
+            if(user1.getPlaylist() != null){
+                return user1.getPlaylist().toString();
+            }else{
+                throw new UserException("Playlist does not exist");
+            }
         }else{
             throw new UserException(STR."User with email: \{email} not found");
         }
 
     }
     @Override
-    public String getSongs(String email){
+    public String getSongs(String email) throws UserException {
         User user1 = userRepo.findByEmail(email).get();
         if(user1 != null){
-            return user1.getPlaylist().getSongs().toString();
+            if(user1.getPlaylist() != null){
+                return user1.getPlaylist().toString();
+            }else{
+                throw new UserException("Playlist does not exist");
+            }
         }else{
-            return STR."User with email: \{email} not found";
+            throw new UserException("User with email: " + email + " is not found");
         }
 
     }

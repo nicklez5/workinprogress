@@ -1,15 +1,20 @@
 package com.spotify11.demo.controller;
 
+import com.spotify11.demo.dtos.LoginUserDto;
 import com.spotify11.demo.dtos.RegisterUserDto;
 import com.spotify11.demo.entity.User;
 import com.spotify11.demo.exception.UserException;
 import com.spotify11.demo.repo.UserRepository;
 
+import com.spotify11.demo.response.LoginResponse;
+import com.spotify11.demo.services.AuthenticationService;
+import com.spotify11.demo.services.JwtService;
 import com.spotify11.demo.services.UserService;
 import jakarta.transaction.Transactional;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -24,11 +29,30 @@ public class UserController {
 
     private final UserService userService;
     private final UserRepository userRepository;
+    private final AuthenticationService authenticationService;
+    private final JwtService jwtService;
 
-
-    public UserController(UserService userService, UserRepository userRepository) {
+    public UserController(UserService userService, UserRepository userRepository, AuthenticationService authenticationService, JwtService jwtService) {
         this.userService = userService;
         this.userRepository = userRepository;
+        this.authenticationService = authenticationService;
+        this.jwtService = jwtService;
+    }
+
+    @PostMapping("/signup")
+    public ResponseEntity<User> register(@RequestBody RegisterUserDto registerUserDto) {
+        User registeredUser = authenticationService.signup(registerUserDto);
+        return ResponseEntity.ok(registeredUser);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponse> authenticate(@RequestBody LoginUserDto loginUserDto) {
+        User authenticatedUser = authenticationService.authenticate(loginUserDto);
+        String token = jwtService.generateToken(authenticatedUser);
+        LoginResponse loginResponse = new LoginResponse();
+        loginResponse.setToken(token);
+        loginResponse.setExpiresIn(jwtService.getExpirationTime());
+        return ResponseEntity.ok(loginResponse);
     }
 
     @GetMapping("/info")
@@ -43,19 +67,7 @@ public class UserController {
         List<User> users = userService.getAllUser();
         return ResponseEntity.ok(users);
     }
-//    @Transactional
-//    @PostMapping("/register")
-//    public ResponseEntity<User> register(String fullName, String password, String email) throws UserException {
-//        User xyz2 = userService.addUser(fullName,password,email);
-//        return ResponseEntity.ok(xyz2);
-//
-//    }
-    @Transactional
-    @GetMapping("/info")
-    public ResponseEntity<User> infoUser(@RequestParam("email") String email) throws UserException {
-        User user1 =  userService.readUser(email);
-        return ResponseEntity.ok(user1);
-    }
+
 
     @Transactional
     @PutMapping("/update")

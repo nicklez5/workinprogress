@@ -8,6 +8,7 @@ import com.spotify11.demo.entity.*;
 import com.spotify11.demo.exception.UserException;
 
 import com.spotify11.demo.repo.UserRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -25,7 +26,7 @@ public class UserImpl implements UserService{
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(12);
 
 
-    @Override
+    @Transactional
     public User addUser(RegisterUserDto input) throws UserException {
         User xyz = new User();
         xyz.setEmail(input.getEmail());
@@ -35,36 +36,46 @@ public class UserImpl implements UserService{
         return xyz;
     }
 
-    @Override
+    @Transactional
     public List<User> getAllUser() {
         return (List<User>) userRepo.findAll();
     }
 
-    @Override
+    @Transactional
     public User updateUser(String fullName, String password, String email) throws UserException {
         User xyz = userRepo.findByEmail(email).get();
-        xyz.setEmail(email);
-        xyz.setPassword(encoder.encode(password));
-        xyz.setFullName(fullName);
-        return xyz;
+        if(xyz == null){
+            throw new UserException("User with email:" + email + " is not found");
+        }else{
+            xyz.setEmail(email);
+            xyz.setPassword(encoder.encode(password));
+            xyz.setFullName(fullName);
+            userRepo.save(xyz);
+            return xyz;
+        }
+
+        
     }
 
 
 
-    @Override
     public User readUser(String email) throws UserException {
-        return userRepo.findByEmail(email).get();
+        User xyz = userRepo.findByEmail(email).get();
+        if(xyz == null){
+            throw new UserException("User with email:" + email + " is not found");
+        }else{
+            return xyz;
+        }
 
     }
     // id is the one we are looking to delete
     // uuID is the parent
-    @Override
     public User deleteUser(String email) throws UserException {
         User user = userRepo.findByEmail(email).get();
         if(user != null){
             userRepo.delete(user);
         }else{
-            throw new UserException("User not found");
+            throw new UserException("User with email" + email + "not found");
         }
         return null;
 
@@ -72,7 +83,7 @@ public class UserImpl implements UserService{
 
     }
 
-    @Override
+
     public User authenticate(LoginUserDto input) throws UserException {
         User user1 = userRepo.findByEmail(input.getEmail()).get();
         if(user1.isEnabled()){

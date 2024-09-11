@@ -19,7 +19,7 @@ public interface SongService {
 
 
 
-    UploadFileResponse createSong(String title, String artist, MultipartFile file, String email) throws Exception;
+    UploadFileResponse createSong(String title, String artist, MultipartFile file, String email) throws Exception, FileNotFoundException, FileStorageException;
     Song updateSong(String title, String artist, MultipartFile file, Integer song_id, String email) throws UserException, SongException, IOException, FileStorageException;
     Resource loadFileAsResource(String fileName) throws FileNotFoundException;
     Song deleteSong(int song_id, String email) throws UserException, SongException;

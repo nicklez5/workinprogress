@@ -40,7 +40,7 @@ public class SongController {
     }
 
     @Transactional
-    @GetMapping("/{id}/info")
+    @GetMapping("/info/{id}")
     public ResponseEntity<Song> getSong(@PathVariable("id") int id, @RequestParam("email") String email) throws UserException, SongException {
         Song str1 = songService.getSong(id,email);
         return ResponseEntity.ok(str1);
