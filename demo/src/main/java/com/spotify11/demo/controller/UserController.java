@@ -1,96 +1,83 @@
 package com.spotify11.demo.controller;
 
-import com.spotify11.demo.entity.*;
-
+import com.spotify11.demo.dtos.RegisterUserDto;
+import com.spotify11.demo.entity.User;
 import com.spotify11.demo.exception.UserException;
-import com.spotify11.demo.repo.PlaylistRepo;
-import com.spotify11.demo.repo.SongRepo;
-import com.spotify11.demo.repo.UserRepo;
-
-
+import com.spotify11.demo.repo.UserRepository;
 
 import com.spotify11.demo.services.UserService;
-
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 
 import java.util.List;
 
-@CrossOrigin(origins = "http://localhost:8080")
+@CrossOrigin
 @RestController
-@RequestMapping("")
+@RequestMapping("/users")
 public class UserController {
 
-
-    @Autowired
-    private PlaylistRepo playlistRepo;
-    @Autowired
-    private SongRepo songRepo;
-    public UserController(UserRepo userRepo, UserService service, SongRepo songRepo) {
-
-        this.userRepo = userRepo;
-        this.service = service;
-        this.songRepo = songRepo;
-    }
-    @Autowired
-    private final UserService service;
+    private final UserService userService;
+    private final UserRepository userRepository;
 
 
-    @Autowired
-    private final UserRepo userRepo;
-
-    @GetMapping("/")
-    public String greet(HttpServletRequest request){
-        return "Welcome to Jackson " + request.getSession().getId();
+    public UserController(UserService userService, UserRepository userRepository) {
+        this.userService = userService;
+        this.userRepository = userRepository;
     }
 
-    @Transactional
-    @PostMapping("/register")
-    public Users register(@RequestBody Users user) throws UserException {
-        return service.register(user);
-
+    @GetMapping("/info")
+    public ResponseEntity<User> authenticatedUser(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User currentUser = (User) authentication.getPrincipal();
+        return ResponseEntity.ok(currentUser);
     }
+
+    @GetMapping("/all")
+    public ResponseEntity<List<User>> getUsers() {
+        List<User> users = userService.getAllUser();
+        return ResponseEntity.ok(users);
+    }
+//    @Transactional
+//    @PostMapping("/register")
+//    public ResponseEntity<User> register(String fullName, String password, String email) throws UserException {
+//        User xyz2 = userService.addUser(fullName,password,email);
+//        return ResponseEntity.ok(xyz2);
+//
+//    }
     @Transactional
     @GetMapping("/info")
-    public Users infoUser(@RequestParam("username") String username) throws UserException {
-        return service.readUser(username);
+    public ResponseEntity<User> infoUser(@RequestParam("email") String email) throws UserException {
+        User user1 =  userService.readUser(email);
+        return ResponseEntity.ok(user1);
     }
 
-    @Transactional
-    @GetMapping("/all")
-    public List<Users> getAllUsers() throws UserException {
-        return service.getAllUser();
-    }
     @Transactional
     @PutMapping("/update")
-    public Users updateUser(@RequestParam("username") String username,@RequestParam("password") String user_password, @RequestParam("role") String user_role, @RequestParam("email") String user_email) throws UserException {
-        return service.updateUser(username,user_password,user_role,user_email);
+    public ResponseEntity<User> updateUser(@RequestParam("username") String username,@RequestParam("password") String user_password, @RequestParam("email") String user_email) throws UserException {
+        User user1 =  userService.updateUser(username,user_password,user_email);
+        return ResponseEntity.ok(user1);
+    }
 
+
+    @Transactional
+    @DeleteMapping("/delete")
+    public ResponseEntity<User> deleteUser(@RequestParam("email") String email) throws UserException {
+        User user1  = userService.deleteUser(email);
+        return ResponseEntity.ok(user1);
     }
     @Transactional
-    @DeleteMapping("/deleteUser/{user_id}")
-    public Users deleteUser(@RequestParam("username") String username, @PathVariable("user_id") Integer user_id) throws  UserException {
-         return service.deleteUser(username,user_id);
-
-    }
-    @Transactional
-    @GetMapping("/readUser")
-    public Users readUser(@RequestParam("username") String username) throws UserException{
-        return service.readUser(username);
-
-    }
-    @Transactional
-    @PostMapping("/login")
-    public String logIn(@RequestBody Users user){
-        return service.verify(user);
-
+    @GetMapping("/read")
+    public ResponseEntity<User> readUser(@RequestParam("email") String email) throws UserException{
+        User user1 = userService.readUser(email);
+        return ResponseEntity.ok(user1);
     }
 
-
-    
 
 }
+

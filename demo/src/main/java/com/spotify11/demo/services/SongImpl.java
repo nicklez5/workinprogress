@@ -1,14 +1,15 @@
 package com.spotify11.demo.services;
 
 import com.spotify11.demo.entity.Song;
-import com.spotify11.demo.entity.Users;
+import com.spotify11.demo.entity.User;
+
 import com.spotify11.demo.exception.FileStorageException;
 import com.spotify11.demo.exception.SongException;
 
 import com.spotify11.demo.exception.UserException;
 import com.spotify11.demo.property.FileStorageProperties;
 import com.spotify11.demo.repo.SongRepo;
-import com.spotify11.demo.repo.UserRepo;
+import com.spotify11.demo.repo.UserRepository;
 import com.spotify11.demo.response.UploadFileResponse;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
@@ -37,7 +38,7 @@ public class SongImpl implements SongService {
     private static final Logger log = LoggerFactory.getLogger(SongImpl.class);
 
 
-    private final UserRepo userRepo;
+    private final UserRepository userRepo;
 
 
     private final SongRepo songRepo;
@@ -46,7 +47,7 @@ public class SongImpl implements SongService {
 
 
 
-    public SongImpl(UserRepo userRepo, SongRepo songRepo, FileStorageProperties fileStorageProperties) {
+    public SongImpl(UserRepository userRepo, SongRepo songRepo, FileStorageProperties fileStorageProperties) {
         this.userRepo = userRepo;
         this.songRepo = songRepo;
         this.fileStorageLocation = Paths.get(fileStorageProperties.getUploadDir()).toAbsolutePath().normalize();
@@ -74,8 +75,8 @@ public class SongImpl implements SongService {
         }
     }
     @Transactional
-    public UploadFileResponse createSong(String title, String artist, MultipartFile file, String username) throws Exception {
-            Users user = userRepo.findByUsername(username);
+    public UploadFileResponse createSong(String title, String artist, MultipartFile file, String email) throws Exception {
+            User user = userRepo.findByEmail(email).get();
             if(user != null){
                 if(file != null){
                     String fileName = StringUtils.cleanPath(file.getOriginalFilename());
@@ -106,7 +107,7 @@ public class SongImpl implements SongService {
                     throw new FileNotFoundException("File not found.");
                 }
             }else {
-                throw new Exception("cannot find username: " + username);
+                throw new Exception("cannot find user with email: " + email);
             }
 
 
@@ -114,8 +115,8 @@ public class SongImpl implements SongService {
 
 
     @Transactional
-    public Song updateSong(String title, String artist, MultipartFile file, Integer song_id, String username) throws UserException, SongException, FileStorageException, IOException {
-            Users user = userRepo.findByUsername(username);
+    public Song updateSong(String title, String artist, MultipartFile file, Integer song_id, String email) throws UserException, SongException, FileStorageException, IOException {
+            User user = userRepo.findByEmail(email).get();
             if(user != null){
                 List<Song> xyz = user.getLibrary().getSongs();
                 song_id = song_id - 1;
@@ -152,7 +153,7 @@ public class SongImpl implements SongService {
                 }
 
             }else {
-                throw new UserException("Username: " + username + " not found");
+                throw new UserException("Username with email: " + email + " not found");
             }
 
     }
@@ -173,8 +174,8 @@ public class SongImpl implements SongService {
 
 
     @Transactional
-    public Song deleteSong(int song_id, String username) throws  UserException, SongException {
-            Users user = userRepo.findByUsername(username);
+    public Song deleteSong(int song_id, String email) throws  UserException, SongException {
+            User user = userRepo.findByEmail(email).get();
             if(user != null){
                 List<Song> xyz = user.getLibrary().getSongs();
                 song_id = song_id - 1;
@@ -187,15 +188,15 @@ public class SongImpl implements SongService {
                     throw new SongException("Song not found in library or is null");
                 }
             }else{
-                throw new UserException("Username: " + username + " not found");
+                throw new UserException("User with email: " + email + " not found");
             }
 
     }
 
 
     @Override
-    public Song getSong(int song_id, String username) throws UserException, SongException {
-        Users user = userRepo.findByUsername(username);
+    public Song getSong(int song_id, String email) throws UserException, SongException {
+        User user = userRepo.findByEmail(email).get();
         if(user != null){
             List<Song> xyz = user.getLibrary().getSongs();
             for(Song song : xyz){
@@ -204,14 +205,14 @@ public class SongImpl implements SongService {
                 }
             }
         }else {
-            throw new UserException("Username: " + username + " not found");
+            throw new UserException("User with email: " + email + " not found");
         }
         return null;
     }
 
     @Override
-    public Song getSong(String title, String username) throws UserException, SongException {
-        Users user = userRepo.findByUsername(username);
+    public Song getSong(String title, String email) throws UserException, SongException {
+        User user = userRepo.findByEmail(email).get();
         if(user != null){
             List<Song> xyz = user.getLibrary().getSongs();
             for (Song song : xyz) {
@@ -220,7 +221,7 @@ public class SongImpl implements SongService {
                 }
             }
         }else{
-            throw new UserException("Username: " + username + " not found");
+            throw new UserException("User with email: " + email + " not found");
         }
 
         return null;
@@ -228,13 +229,13 @@ public class SongImpl implements SongService {
 
 
     @Override
-    public List<Song> getAllSongs(String username) throws UserException, SongException {
-        Users user = userRepo.findByUsername(username);
+    public List<Song> getAllSongs(String email) throws UserException, SongException {
+        User user = userRepo.findByEmail(email).get();
         if(user != null){
             List<Song> xyz = user.getLibrary().getSongs();
             return xyz;
         }else {
-            throw new UserException("Username: " + username + " not found");
+            throw new UserException("User with email: " + email + " not found");
         }
     }
 }

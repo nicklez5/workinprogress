@@ -1,5 +1,7 @@
 package com.spotify11.demo.services;
 
+import com.spotify11.demo.dtos.LoginUserDto;
+import com.spotify11.demo.dtos.RegisterUserDto;
 import com.spotify11.demo.entity.*;
 
 import com.spotify11.demo.exception.UserException;
@@ -10,19 +12,14 @@ import com.spotify11.demo.exception.PlaylistException;
 import jakarta.servlet.http.HttpServletRequest;
 
 public interface UserService {
-    //public String addUser();
-    Users register(Users user) throws UserException;
-    List<Users> getAllUser();
+
+    User addUser(RegisterUserDto input) throws UserException;
+    List<User> getAllUser();
+
+    User updateUser(String fullName, String password, String email) throws UserException;
+    User readUser(String email) throws UserException;
+    User deleteUser(String email) throws UserException;
 
 
-
-
-    Users updateUser(String username, String password, String role, String email) throws UserException;
-    Users readUser(String username) throws UserException;
-    Users deleteUser(String username, Integer user_id) throws UserException;
-
-
-    String verify(Users user);
-
-
+    User authenticate(LoginUserDto input) throws UserException;
 }

@@ -19,11 +19,11 @@ public interface SongService {
 
 
 
-    UploadFileResponse createSong(String title, String artist, MultipartFile file, String username) throws Exception;
-    Song updateSong(String title, String artist, MultipartFile file, Integer song_id, String username) throws UserException, SongException, IOException, FileStorageException;
+    UploadFileResponse createSong(String title, String artist, MultipartFile file, String email) throws Exception;
+    Song updateSong(String title, String artist, MultipartFile file, Integer song_id, String email) throws UserException, SongException, IOException, FileStorageException;
     Resource loadFileAsResource(String fileName) throws FileNotFoundException;
-    Song deleteSong(int song_id, String username) throws UserException, SongException;
-    Song getSong(int id, String username) throws  UserException,SongException;
-    Song getSong(String title, String username) throws  UserException,SongException;
-    List<Song> getAllSongs(String username) throws UserException, SongException;
+    Song deleteSong(int song_id, String email) throws UserException, SongException;
+    Song getSong(int id, String email) throws  UserException,SongException;
+    Song getSong(String title, String email) throws  UserException,SongException;
+    List<Song> getAllSongs(String email) throws UserException, SongException;
 }

@@ -2,12 +2,15 @@ package com.spotify11.demo.services;
 
 import com.spotify11.demo.entity.Library;
 import com.spotify11.demo.entity.Song;
-import com.spotify11.demo.entity.Users;
+import com.spotify11.demo.entity.User;
+
 
 import com.spotify11.demo.exception.LibraryException;
 import com.spotify11.demo.exception.SongException;
+import com.spotify11.demo.exception.UserException;
 import com.spotify11.demo.repo.LibraryRepo;
-import com.spotify11.demo.repo.UserRepo;
+
+import com.spotify11.demo.repo.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -15,64 +18,73 @@ import org.springframework.stereotype.Service;
 public class LibraryImpl implements LibraryService {
 
 
-    private final UserRepo userRepo;
+    private final UserRepository userRepo;
 
     private final LibraryRepo libraryRepo;
 
 
     
-    public LibraryImpl(UserRepo userRepo, LibraryRepo libraryRepo)  {
+    public LibraryImpl(UserRepository userRepo, LibraryRepo libraryRepo)  {
         this.userRepo = userRepo;
         this.libraryRepo = libraryRepo;
     }
 
 
     @Transactional
-    public Library addSong(Song song1,String username) throws SongException{
+    public Library addSong(Song song1,String email) throws SongException, UserException {
 
-        Users user = userRepo.findByUsername(username);
-        if (song1 != null) {
-            user.getLibrary().addSong(song1);
-            userRepo.save(user);
-            return user.getLibrary();
+        User user1 = userRepo.findByEmail(email).get();
+        if (user1 != null) {
+            if (song1 != null) {
+                user1.getLibrary().addSong(song1);
+                userRepo.save(user1);
+                return user1.getLibrary();
+            }else{
+                throw new SongException("File corrupted");
+            }
         } else {
-            throw new SongException("Song does not exist");
+            throw new UserException("User not found");
         }
     }
 
     @Transactional
-    public Library deleteSong(Song song1, String username) throws SongException {
-        Users user = userRepo.findByUsername(username);
-        if (song1 != null) {
-            user.getLibrary().removeSong(song1);
-            userRepo.save(user);
-            return user.getLibrary();
+    public Library deleteSong(Song song1, String email) throws SongException, UserException {
+        User user1 = userRepo.findByEmail(email).get();
+        if (user1 != null) {
+            if (song1 != null) {
+                user1.getLibrary().removeSong(song1);
+                userRepo.save(user1);
+                return user1.getLibrary();
+            }else{
+                throw new SongException("song does not exist");
+            }
         }else{
-            throw new SongException("song does not exist");
+            throw new UserException("User does not exist");
         }
+
 
     }
 
 
 
-    public Library getLibrary(String username) throws LibraryException {
-        Users user = userRepo.findByUsername(username);
-        if(user.getLibrary() == null){
+    public Library getLibrary(String email) throws LibraryException {
+        User user1 = userRepo.findByEmail(email).get();
+        if(user1.getLibrary() == null){
             throw new LibraryException("Library is null");
         }else{
-            return user.getLibrary();
+            return user1.getLibrary();
         }
     }
 
     @Transactional
-    public Library clearLibrary(String username) throws LibraryException {
-        Users user = userRepo.findByUsername(username);
-            if(user.getLibrary() == null) {
+    public Library clearLibrary(String email) throws LibraryException {
+        User user1 = userRepo.findByEmail(email).get();
+            if(user1.getLibrary() == null) {
                 throw new LibraryException("Library is null");
             }else {
                 Library library = new Library();
-                user.setLibrary(library);
-                userRepo.save(user);
+                user1.setLibrary(library);
+                userRepo.save(user1);
                 return library;
             }
     }

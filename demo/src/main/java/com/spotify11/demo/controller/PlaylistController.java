@@ -10,12 +10,13 @@ import com.spotify11.demo.exception.UserException;
 import com.spotify11.demo.services.PlaylistService;
 
 import jakarta.transaction.Transactional;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 
-@CrossOrigin(origins = "http://localhost:8080")
+@CrossOrigin
 @RestController
-@RequestMapping("playlist")
+@RequestMapping("/playlist")
 public class PlaylistController {
 
     private final PlaylistService playlistService;
@@ -26,20 +27,22 @@ public class PlaylistController {
 
     // ADD SONG
     @Transactional
-    @PostMapping("/addSongToPlaylist/{username}")
-    public Playlist addSongForPlaylist(@RequestBody Song entity, @PathVariable(name = "username") String username) throws Exception {
+    @PostMapping("/addSongToPlaylist/{email}")
+    public ResponseEntity<Playlist> addSongForPlaylist(@RequestBody Song entity, @PathVariable(name = "email") String email) throws Exception {
         try{
-            return playlistService.addSong(entity.getId(), username);
+            Playlist playlist1 = playlistService.addSong(entity.getId(), email);
+            return ResponseEntity.ok(playlist1);
         } catch (Exception e) {
             throw new Exception("Song name: " + entity.getTitle() + "could not be found");
         }
 
     }
     @Transactional
-    @DeleteMapping("/removeSongFromPlaylist/{username}")
-    public Playlist removeSongFromPlaylist(@RequestBody Song entity, @PathVariable(name = "username") String username) throws Exception {
+    @DeleteMapping("/removeSongFromPlaylist/{email}")
+    public ResponseEntity<Playlist> removeSongFromPlaylist(@RequestBody Song entity, @PathVariable(name = "email") String email) throws Exception {
         try{
-            return playlistService.removeSong(entity.getId(), username );
+            Playlist playlist1 = playlistService.removeSong(entity.getId(), email );
+            return ResponseEntity.ok(playlist1);
         } catch (Exception e) {
             throw new Exception("Song name: " + entity.getTitle() + "could not be found");
         }
@@ -47,11 +50,12 @@ public class PlaylistController {
     }
     @Transactional
     @GetMapping(value = "/getSongs")
-    public String getSongs(@RequestParam("username") String username) throws Exception {
+    public ResponseEntity<String> getSongs(@RequestParam("email") String email) throws Exception {
         try{
-            return playlistService.getSongs(username);
+            String str1 = playlistService.getSongs(email);
+            return ResponseEntity.ok(str1);
         } catch (Exception e) {
-            throw new Exception("Could not find user with username: " + username);
+            throw new Exception("Could not find user with email: " + email);
         }
 
     }
@@ -60,45 +64,45 @@ public class PlaylistController {
     // DELETE
     @Transactional
     @DeleteMapping("/deletePlaylist")
-    public String deletePlaylist(@RequestParam("username") String username) throws PlaylistException, UserException{
-        return playlistService.deletePlaylist(username);
-
+    public ResponseEntity<Playlist> deletePlaylist(@RequestParam("email") String email) throws PlaylistException, UserException{
+        Playlist pl1 = playlistService.deletePlaylist(email);
+        return ResponseEntity.ok(pl1);
     }
 
     // ADD
     @Transactional
     @PostMapping("/createPlaylist")
-    public Playlist createPlaylist(@RequestParam("username") String username, @RequestParam("playlist_name") String playlist_name) throws  UserException {
-        return playlistService.createPlaylist(username,playlist_name);
-
+    public ResponseEntity<Playlist> createPlaylist(@RequestParam("email") String email, @RequestParam("playlist_name") String playlist_name) throws  UserException {
+        Playlist pl2 = playlistService.createPlaylist(email,playlist_name);
+        return ResponseEntity.ok(pl2);
     }
     // READ
     @GetMapping("/readPlaylist")
-    public Playlist readPlaylist(@RequestParam("username") String username) throws PlaylistException, UserException{
-        return playlistService.readPlaylist(username);
-
+    public ResponseEntity<Playlist> readPlaylist(@RequestParam("email") String email) throws PlaylistException, UserException{
+        Playlist pt2 = playlistService.readPlaylist(email);
+        return ResponseEntity.ok(pt2);
     }
     //RENAME
     @Transactional
     @PutMapping("/renamePlaylist")
-    public String renamePlaylist(@RequestParam("username") String username, @RequestParam("playlist_name") String playlist_name) throws UserException, PlaylistException {
-        return playlistService.renamePlaylist(username,playlist_name);
-
+    public ResponseEntity<String> renamePlaylist(@RequestParam("email") String email, @RequestParam("playlist_name") String playlist_name) throws UserException, PlaylistException {
+        String str3 = playlistService.renamePlaylist(email,playlist_name);
+        return ResponseEntity.ok(str3);
     }
     // CLEAR
     @Transactional
     @DeleteMapping("/clearPlaylist")
-    public String clearPlaylist(@RequestParam("username") String username) throws UserException, PlaylistException {
-        return playlistService.clearPlaylist(username);
-
+    public ResponseEntity<String> clearPlaylist(@RequestParam("email") String email) throws UserException, PlaylistException {
+        String str3 = playlistService.clearPlaylist(email);
+        return ResponseEntity.ok(str3);
     }
 
     // GET A PLAYLIST
     @Transactional
     @GetMapping("/getPlaylist")
-    public String getPlaylist(@RequestParam("username") String username) throws UserException, PlaylistException {
-        return playlistService.getPlaylist(username);
-
+    public ResponseEntity<String> getPlaylist(@RequestParam("email") String email) throws UserException, PlaylistException {
+        String str1 = playlistService.getPlaylist(email);
+        return ResponseEntity.ok(str1);
     }
 
 

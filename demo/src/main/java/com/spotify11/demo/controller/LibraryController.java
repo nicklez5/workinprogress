@@ -10,11 +10,12 @@ import com.spotify11.demo.services.LibraryService;
 import com.spotify11.demo.services.SongService;
 
 import jakarta.transaction.Transactional;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@CrossOrigin(origins = "http://localhost:8080")
+@CrossOrigin
 @RestController
-@RequestMapping("library")
+@RequestMapping("/library")
 public class LibraryController {
 
     private final LibraryService libraryService;
@@ -28,31 +29,31 @@ public class LibraryController {
 
     @Transactional
     @PostMapping("/addSong")
-    public Library addSong(@RequestParam("title") String title, @RequestParam("username") String username) throws SongException, UserException {
-        return libraryService.addSong(this.songService.getSong(title,username), username);
-
+    public ResponseEntity<Library> addSong(@RequestParam("title") String title, @RequestParam("email") String email) throws SongException, UserException {
+        Library lib1 = libraryService.addSong(this.songService.getSong(title,email), email);
+        return ResponseEntity.ok(lib1);
 
     }
     @Transactional
     @DeleteMapping("/deleteSong")
-    public Library deleteSong(@RequestParam("title") String title, @RequestParam("username") String username) throws SongException, UserException {
-        return libraryService.deleteSong(this.songService.getSong(title,username), username);
-
+    public ResponseEntity<Library> deleteSong(@RequestParam("title") String title, @RequestParam("email") String email) throws SongException, UserException {
+        Library lib1 = libraryService.deleteSong(this.songService.getSong(title,email), email);
+        return ResponseEntity.ok(lib1);
 
 
     }
 
     @Transactional
     @GetMapping("/info")
-    public Library getLibrary(@RequestParam("username") String username) throws  LibraryException {
-        return libraryService.getLibrary(username);
-
+    public ResponseEntity<Library> getLibrary(@RequestParam("email") String email) throws  LibraryException {
+        Library lib1 = libraryService.getLibrary(email);
+        return ResponseEntity.ok(lib1);
     }
     @Transactional
     @DeleteMapping("/clear")
-    public Library clearLibrary(@RequestParam("username") String username) throws  LibraryException {
-        return libraryService.clearLibrary(username);
-
+    public ResponseEntity<Library> clearLibrary(@RequestParam("email") String email) throws  LibraryException {
+        Library lib1 =  libraryService.clearLibrary(email);
+        return ResponseEntity.ok(lib1);
     }
 
 }
