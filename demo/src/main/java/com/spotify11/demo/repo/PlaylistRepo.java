@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface PlaylistRepo extends JpaRepository<Playlist, Long> {
+public interface PlaylistRepo extends JpaRepository<Playlist, Integer> {
     Playlist findByName(String name);
     
 }

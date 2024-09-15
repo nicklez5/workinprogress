@@ -10,7 +10,7 @@ import java.util.List;
 
 
 @Repository
-public interface SongRepo extends JpaRepository<Song,Long> {
+public interface SongRepo extends JpaRepository<Song,Integer> {
 
     Optional<Song> findByTitle(String title);
 }

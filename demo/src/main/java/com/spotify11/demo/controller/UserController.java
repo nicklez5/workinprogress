@@ -14,6 +14,7 @@ import com.spotify11.demo.services.JwtService;
 import com.spotify11.demo.services.UserService;
 import jakarta.transaction.Transactional;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -30,10 +31,13 @@ import java.util.List;
 @RestController
 @RequestMapping("/users")
 public class UserController {
-
+    @Autowired
     private final UserService userService;
+    @Autowired
     private final UserRepository userRepository;
+    @Autowired
     private final AuthenticationService authenticationService;
+    @Autowired
     private final JwtService jwtService;
 
     public UserController(UserService userService, UserRepository userRepository, AuthenticationService authenticationService, JwtService jwtService) {
@@ -42,6 +46,7 @@ public class UserController {
         this.authenticationService = authenticationService;
         this.jwtService = jwtService;
     }
+
 
     @PostMapping("/signup")
     public ResponseEntity<User> register(@RequestBody RegisterUserDto registerUserDto) {
@@ -77,15 +82,15 @@ public class UserController {
     }
 
     @GetMapping("/getCurrentUser/{user_id}")
-    public ResponseEntity<User> getCurrentUser(@PathVariable(value = "user_id") Long id) {
+    public ResponseEntity<User> getCurrentUser(@PathVariable(value = "user_id") Integer id) {
         User user1 = userRepository.findById(id).get();
         return ResponseEntity.ok(user1);
     }
 
     @Transactional
     @PutMapping("/update")
-    public ResponseEntity<User> updateUser(@RequestParam("username") String username,@RequestParam("password") String user_password, @RequestParam("email") String user_email) throws UserException {
-        User user1 =  userService.updateUser(username,user_password,user_email);
+    public ResponseEntity<User> updateUser(@RequestParam("fullName") String fullName,@RequestParam("password") String user_password, @RequestParam("email") String user_email) throws UserException {
+        User user1 =  userService.updateUser(fullName,user_password,user_email);
         return ResponseEntity.ok(user1);
     }
 

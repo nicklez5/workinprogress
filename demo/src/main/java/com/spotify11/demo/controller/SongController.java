@@ -10,11 +10,16 @@ import com.spotify11.demo.response.UploadFileResponse;
 import com.spotify11.demo.services.SongService;
 
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -28,15 +33,21 @@ import java.util.List;
 @RequestMapping("/songs")
 public class SongController {
 
+    private static final Logger logger = LoggerFactory.getLogger(SongController.class);
 
-    private SongService songService;
-    private SongRepo songrepo;
 
-    private final String FOLDER_PATH = "C:/Users/jesus/Downloads/demo(13)/demo/src/main/resources/static";
+    private final SongRepo songrepo;
+
+    private final SongService songService;
+    @Autowired
+    public SongController(SongService songService,SongRepo songRepo) {
+        this.songService = songService;
+        this.songrepo = songRepo;
+    }
 
     @Transactional
     @GetMapping("/info/}")
-    public ResponseEntity<String> getSong(@RequestParam("title") String title, @RequestParam("email") String email) throws UserException, SongException {
+    public ResponseEntity<String> getSong(@RequestParam("title") String title) throws UserException, SongException {
         String str1 = songService.getSong(title);
         return ResponseEntity.ok(str1);
     }
@@ -48,8 +59,8 @@ public class SongController {
     }
     @Transactional
     @PutMapping("/editSong/{song_id}")
-    public ResponseEntity<Song> editSong(@RequestParam("title") String title, @RequestParam("artist") String artist, @RequestParam("file") MultipartFile file,  @PathVariable("song_id") Long song_id )throws UserException, SongException, IOException {
-        Song song2 = songService.updateSong(title, artist, file, song_id);
+    public ResponseEntity<Song> editSong(@RequestParam("title") String title, @RequestParam("artist") String artist, @RequestParam("file") MultipartFile file,@PathVariable("song_id") Integer song_id,  @RequestParam("email") String email )throws UserException, SongException, IOException {
+        Song song2 = songService.updateSong(title, artist, file,song_id, email);
         songrepo.save(song2);
         return ResponseEntity.ok(song2);
     }
@@ -63,10 +74,23 @@ public class SongController {
     }
 
     @Transactional
-    @GetMapping("/Download/{filename:.+}")
-    public ResponseEntity<Resource> downloadSong(@PathVariable String filename) throws IOException {
-        Resource file = songService.loadSong(filename);
-        return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFilename() + "\"").body(file);
+    @GetMapping("/downloadFile")
+    public ResponseEntity<Resource> downloadSong(@RequestParam("filename") String filename, HttpServletRequest request) throws Exception {
+        Resource resource = songService.loadFileAsResource(filename);
+        String contentType = null;
+        try{
+            contentType = request.getServletContext().getMimeType(resource.getFile().getAbsolutePath());
+        }catch(IOException e){
+            logger.info("Could not determine file type.");
+        }
+        if(contentType == null){
+            logger.info("Could not determine file type.");
+        }
+        assert contentType != null;
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
+                .body(resource);
 
     }
 

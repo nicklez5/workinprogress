@@ -5,10 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Getter
 @Entity
@@ -19,11 +16,11 @@ public class Library {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private int id;
+    private Integer id;
 
 
     @OneToMany(cascade=CascadeType.ALL , fetch = FetchType.EAGER)
-    private Set<Song> songs = new HashSet<>();
+    private List<Song> songs = new LinkedList<>();
 
 
     public String toString(){

@@ -12,7 +12,7 @@ import com.spotify11.demo.entity.Library;
 
 
 @Repository
-public interface LibraryRepo extends JpaRepository<Library,Long> {
+public interface LibraryRepo extends JpaRepository<Library,Integer> {
     
     
 }

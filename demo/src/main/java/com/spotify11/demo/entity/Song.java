@@ -19,7 +19,7 @@ public class Song {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(unique = true, nullable = false)
-    private Long id;
+    private Integer id;
 
     @Column(name = "title")
     private String title;
@@ -27,8 +27,8 @@ public class Song {
     @Column(name = "artist")
     private String artist;
 
-    @Column(name = "fileName")
-    private String fileName;
+    @Column(name = "filename")
+    private String filename;
 
     @Column(name = "fileDownloadUri")
     private URI fileDownloadUri;

@@ -2,6 +2,7 @@ package com.spotify11.demo.entity;
 
 import java.util.*;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -21,7 +22,7 @@ public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(nullable = false,unique = true)
-    private Long id;
+    private Integer id;
 
     @Column(nullable = false)
     private String fullName;
@@ -32,10 +33,7 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String password;
 
-    @Column(nullable = false)
-    private String role;
     @CreationTimestamp
-
     @Column(updatable = false, name = "created_at")
     private Date createdAt;
 
@@ -83,6 +81,7 @@ public class User implements UserDetails {
     @Setter
     @Getter
     @OneToMany(cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<Playlist> playlists = new ArrayList<>();
 
 

@@ -14,11 +14,14 @@ import com.spotify11.demo.repo.UserRepository;
 import com.spotify11.demo.services.PlaylistService;
 
 import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import static org.springframework.http.ResponseEntity.ok;
@@ -29,9 +32,13 @@ import static org.springframework.http.ResponseEntity.ok;
 @RequestMapping("/playlists")
 public class PlaylistController {
 
+    @Autowired
     private PlaylistService playlistService;
+    @Autowired
     private PlaylistRepo playlistRepo;
+    @Autowired
     private UserRepository userRepository;
+    @Autowired
     private SongRepo song_repo;
 
 
@@ -40,7 +47,7 @@ public class PlaylistController {
     // ADD SONG
     @Transactional
     @PostMapping("/addSong/{playlist_id}")
-    public ResponseEntity<String> addSongForPlaylist(@RequestBody Song entity, @RequestParam("playlist_id") Long playlist_id) throws Exception {
+    public ResponseEntity<String> addSongForPlaylist(@RequestBody Song entity, @PathVariable("playlist_id") Integer playlist_id) throws Exception {
         try{
             String playlist1 = playlistService.addSong(entity,playlist_id);
             return ok(playlist1);
@@ -51,7 +58,7 @@ public class PlaylistController {
     }
     @Transactional
     @DeleteMapping("/removeSong/{song_id}/fromplaylist/{playlist_id}")
-    public ResponseEntity<String> removeSongFromPlaylist(@PathVariable("song_id") Long song_id, @PathVariable(name = "playlist_id") Long playlist_id) throws Exception {
+    public ResponseEntity<String> removeSongFromPlaylist(@PathVariable("song_id") Integer song_id, @PathVariable(name = "playlist_id") Integer playlist_id) throws Exception {
         try{
             if(song_repo.findById(song_id).isPresent()){
                 Song song123 = song_repo.findById(song_id).get();
@@ -65,11 +72,11 @@ public class PlaylistController {
     }
     @Transactional
     @GetMapping(value = "/getSongs/{playlist_id}")
-    public ResponseEntity<Set<Song>> getSongs(@PathVariable("playlist_id") Long playlist_id) throws Exception {
+    public ResponseEntity<List<Song>> getSongs(@PathVariable("playlist_id") Integer playlist_id) throws Exception {
         try{
             if(playlistRepo.findById(playlist_id).isPresent()){
-               Set<Song> xyz = playlistRepo.findById(playlist_id).get().getSongs();
-               return ok(xyz);
+                List<Song> xyz = playlistRepo.findById(playlist_id).get().getSongs();
+                return ok(xyz);
             };
         } catch (Exception e) {
             throw new Exception("Could not find playlist with id: " + playlist_id);
@@ -82,7 +89,7 @@ public class PlaylistController {
     // DELETE
     @Transactional
     @DeleteMapping("/deletePlaylist/{playlist_id}")
-    public ResponseEntity<?> deletePlaylist(@PathVariable("playlist_id") Long playlist_id) throws PlaylistException, UserException{
+    public ResponseEntity<?> deletePlaylist(@PathVariable("playlist_id") Integer playlist_id) throws PlaylistException, UserException{
         playlistService.deletePlaylist(playlist_id);
         return (ResponseEntity<?>) ok();
     }
@@ -90,13 +97,13 @@ public class PlaylistController {
     // ADD
     @Transactional
     @PostMapping("/createPlaylist/{user_id}/")
-    public ResponseEntity<Playlist> createPlaylist(@PathVariable("user_id") Long user_id, @RequestParam("playlist_name") String playlist_name) throws  UserException {
-        Playlist play1 = new Playlist(playlistRepo.count(), playlist_name, new HashSet<>(), userRepository.findById(user_id).get());
+    public ResponseEntity<Playlist> createPlaylist(@PathVariable("user_id") Integer user_id, @RequestParam("playlist_name") String playlist_name) throws  UserException {
+        Playlist play1 = new Playlist((int)playlistRepo.count(), playlist_name, new ArrayList<>(), userRepository.findById(user_id).get());
         return ok(play1);
     }
     // READ
     @GetMapping("/readPlaylist/{playlist_id}")
-    public ResponseEntity<?> readPlaylist(@PathVariable("playlist_id") Long playlist_id) throws PlaylistException, UserException{
+    public ResponseEntity<?> readPlaylist(@PathVariable("playlist_id") Integer playlist_id) throws PlaylistException, UserException{
         playlistService.readPlaylist(playlist_id);
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.ACCEPT, "application/json");
@@ -106,7 +113,7 @@ public class PlaylistController {
     //RENAME
     @Transactional
     @PutMapping("/renamePlaylist/{playlist_id}")
-    public ResponseEntity<String> renamePlaylist(@PathVariable("playlist_id") Long playlist_id, @RequestParam("playlist_name") String playlist_name) throws UserException, PlaylistException {
+    public ResponseEntity<String> renamePlaylist(@PathVariable("playlist_id") Integer playlist_id, @RequestParam("playlist_name") String playlist_name) throws UserException, PlaylistException {
         playlistService.renamePlaylist(playlist_name,playlist_id);
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.ACCEPT, "application/json");
@@ -118,7 +125,7 @@ public class PlaylistController {
     // CLEAR
     @Transactional
     @DeleteMapping("/clearPlaylist/{playlist_id}")
-    public ResponseEntity<String> clearPlaylist(@PathVariable("playlist_id") Long playlist_id) throws UserException, PlaylistException {
+    public ResponseEntity<String> clearPlaylist(@PathVariable("playlist_id") Integer playlist_id) throws UserException, PlaylistException {
         playlistService.clearPlaylist(playlist_id);
         return ok("Playlist has been cleared");
     }
@@ -126,7 +133,7 @@ public class PlaylistController {
     // GET A PLAYLIST
     @Transactional
     @GetMapping("/getPlaylist/{playlist_id}")
-    public ResponseEntity<Set<Song>> getPlaylist(@PathVariable("playlist_id") Long playlist_id) throws UserException, PlaylistException {
+    public ResponseEntity<Set<Song>> getPlaylist(@PathVariable("playlist_id") Integer playlist_id) throws UserException, PlaylistException {
         Set<Song> str1 = playlistService.getPlaylist(playlist_id);
         return ok(str1);
     }
