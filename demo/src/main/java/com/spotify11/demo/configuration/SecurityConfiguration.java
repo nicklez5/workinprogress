@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import com.spotify11.demo.configuration.JwtAuthenticationFilter;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -33,7 +34,7 @@ public class SecurityConfiguration  {
         http.csrf(csrf -> csrf
                 .disable())
                 .authorizeHttpRequests(requests -> requests
-                        .requestMatchers("/users/**")
+                        .requestMatchers("/users/**", "/song/**", "/playlist/**", "/library/**", "/**","/static/favicon.ico")
                         .permitAll()
                         .anyRequest()
                         .authenticated())
@@ -50,7 +51,7 @@ public class SecurityConfiguration  {
         CorsConfiguration configuration = new CorsConfiguration();
 
         configuration.setAllowedOrigins(List.of("http://localhost:3000"));
-        configuration.setAllowedMethods(List.of("GET","POST"));
+        configuration.setAllowedMethods(List.of("GET","POST","DELETE","PUT"));
         configuration.setAllowedHeaders(List.of("Authorization","Content-Type"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

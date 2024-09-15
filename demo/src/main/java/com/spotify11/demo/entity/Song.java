@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
+import java.net.URI;
+
 @Setter
 @Getter
 @Entity
@@ -16,7 +18,8 @@ public class Song {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private int id;
+    @Column(unique = true, nullable = false)
+    private Long id;
 
     @Column(name = "title")
     private String title;
@@ -24,17 +27,17 @@ public class Song {
     @Column(name = "artist")
     private String artist;
 
+    @Column(name = "fileName")
+    private String fileName;
+
     @Column(name = "fileDownloadUri")
-    private String fileDownloadUri;
+    private URI fileDownloadUri;
 
-    @Column(name = "filename")
-    private String filename;
-
-    public Song(String title, String artist, String fileDownloadUri, String filename) {
+    public Song(String title, String artist, String fileName, URI fileDownloadUri1) {
         this.title = title;
         this.artist = artist;
-        this.fileDownloadUri = fileDownloadUri;
-        this.filename = filename;
+        this.fileName = fileName;
+        this.fileDownloadUri = fileDownloadUri1;
     }
 
     @Override

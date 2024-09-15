@@ -15,18 +15,19 @@ public class Playlist {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Integer id;
+    @Column(name = "playlist_id", unique = true)
+    private Long id;
 
     @Column(name = "name")
     private String name;
 
-    public Playlist(String playlist_name) {
-        this.name = playlist_name;
 
-    }
+    @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    private Set<Song> songs = new HashSet<>();
 
-    @OneToMany(cascade=CascadeType.ALL , fetch = FetchType.EAGER)
-    private Set<Song> songs;
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(unique = true, nullable = false)
+    private User user;
 
 
 }

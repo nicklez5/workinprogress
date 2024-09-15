@@ -1,25 +1,15 @@
 package com.spotify11.demo.entity;
 
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
+import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import javax.persistence.ManyToMany;
 
 @Data
 @Entity
@@ -30,29 +20,29 @@ public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(nullable = false)
-    private Integer id;
+    @Column(nullable = false,unique = true)
+    private Long id;
 
-    @Setter
-    @Getter
+    @Column(nullable = false)
     private String fullName;
 
-
-    @Setter
-    @Getter
+    @Column(nullable = false)
     private String email;
 
-    @Setter
-    @Getter
+    @Column(nullable = false)
     private String password;
 
+    @Column(nullable = false)
+    private String role;
     @CreationTimestamp
+
     @Column(updatable = false, name = "created_at")
     private Date createdAt;
 
     @UpdateTimestamp
     @Column(name = "updated_at")
     private Date updatedAt;
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -92,7 +82,11 @@ public class User implements UserDetails {
 
     @Setter
     @Getter
-    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    private Playlist playlist;
+    @OneToMany(cascade = CascadeType.ALL)
+    private List<Playlist> playlists = new ArrayList<>();
 
+
+    public void setPlaylist(LinkedList<Playlist> playlists) {
+        this.playlists = playlists;
+    }
 }

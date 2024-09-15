@@ -5,9 +5,10 @@ import jakarta.persistence.*;
 import lombok.*;
 
 
-
-
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Entity
@@ -22,19 +23,13 @@ public class Library {
 
 
     @OneToMany(cascade=CascadeType.ALL , fetch = FetchType.EAGER)
-    private List<Song> songs;
+    private Set<Song> songs = new HashSet<>();
 
 
-
-
-    public void addSong(Song song) {
-        this.songs.add(song);
-    }
-    public void removeSong(Song song) {
-        this.songs.remove(song);
-    }
     public String toString(){
-        return "Library Id: " + id + " Songs: " + songs;
+        getSongs().forEach(System.out::println);
+        return getSongs().toString();
+
     }
 
 }

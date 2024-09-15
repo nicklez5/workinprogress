@@ -2,6 +2,8 @@ package com.spotify11.demo.controller;
 
 import com.spotify11.demo.dtos.LoginUserDto;
 import com.spotify11.demo.dtos.RegisterUserDto;
+import com.spotify11.demo.entity.Library;
+import com.spotify11.demo.entity.Playlist;
 import com.spotify11.demo.entity.User;
 import com.spotify11.demo.exception.UserException;
 import com.spotify11.demo.repo.UserRepository;
@@ -20,6 +22,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 @CrossOrigin
@@ -42,6 +46,10 @@ public class UserController {
     @PostMapping("/signup")
     public ResponseEntity<User> register(@RequestBody RegisterUserDto registerUserDto) {
         User registeredUser = authenticationService.signup(registerUserDto);
+        registeredUser.setLibrary(new Library());
+        List<Playlist> playlists1 = new ArrayList<>();
+        registeredUser.setPlaylists(playlists1);
+        userRepository.save(registeredUser);
         return ResponseEntity.ok(registeredUser);
     }
 
@@ -68,6 +76,11 @@ public class UserController {
         return ResponseEntity.ok(users);
     }
 
+    @GetMapping("/getCurrentUser/{user_id}")
+    public ResponseEntity<User> getCurrentUser(@PathVariable(value = "user_id") Long id) {
+        User user1 = userRepository.findById(id).get();
+        return ResponseEntity.ok(user1);
+    }
 
     @Transactional
     @PutMapping("/update")
@@ -79,8 +92,8 @@ public class UserController {
 
     @Transactional
     @DeleteMapping("/delete")
-    public ResponseEntity<User> deleteUser(@RequestParam("email") String email) throws UserException {
-        User user1  = userService.deleteUser(email);
+    public ResponseEntity<String> deleteUser(@RequestParam("email") String email) throws UserException {
+        String user1 = userService.deleteUser(email);
         return ResponseEntity.ok(user1);
     }
     @Transactional

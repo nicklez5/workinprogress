@@ -43,6 +43,12 @@
 			<optional>true</optional>
 		</dependency>
 		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>5.1.34</version>
+		</dependency>
+
+		<dependency>
 			<groupId>com.mysql</groupId>
 			<artifactId>mysql-connector-j</artifactId>
 			<scope>runtime</scope>
@@ -109,6 +115,7 @@
 			<artifactId>jjwt-jackson</artifactId>
 			<version>0.11.5</version>
 		</dependency>
+
 	</dependencies>
 
 	<build>
@@ -135,7 +142,7 @@
 			<url>http://localhost:8081/repository/abc123/</url>
 		</snapshotRepository>
 		<repository>
-			<id>nexusdeploymentrepo</id>
+			<id>nexusdeploymentrepo2</id>
 			<url>http://localhost:8081/repository/release123/</url>
 		</repository>
 	</distributionManagement>
